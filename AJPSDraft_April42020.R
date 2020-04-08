@@ -849,10 +849,10 @@ uncleanWinners<-unclean%>%filter(UCWonElection==1)
 
 ## Merge Clean Elections candidates to non-Clean Elections candidates, creating
 ## different observation for each pairing even if Clean Elections candidate is
-## used twice to compare with two different non-Clean Elections candidates.
-## We decided to use each clean-nonclean pairing as an observation.
-## Do this for general election candidates and winners respectively because
-## Table 4 uses GE candidates only and Table 5 uses winners only
+## used twice to compare with two different non-Clean Elections candidates. We
+## decided to use each clean-nonclean pairing as an observation. Do this for
+## general election candidates and winners respectively because Table 4 and 6
+## use GE candidates only and Table 5 uses winners only
 
 cleanGC<-cleanGenCan%>%left_join(uncleanGenCan, by=c("Cyear"="UCyear", "Cdno"="UCdno", "Cparty"="UCparty"))
 cleanW<-cleanWinners%>%left_join(uncleanWinners, by=c("Cyear"="UCyear", "Cdno"="UCdno", "Cparty"="UCparty"))
@@ -902,6 +902,7 @@ modRDyn$coefficients[1]<-DynR$estimate[[1]]
 ## Have to add back one due to degree of freedom calculation, not sure how to pull out total
 ## observations from T-test object. Have to remember to edit t-test results to reflect proper
 ## observation totals before publication
+
 paste("N", "&", nonDynD$parameter+1, "&", DynD$parameter+1, "&", nonDynR$parameter+1, "&", DynR$parameter+1, sep=" ")
 
 ## Create latex table with results
