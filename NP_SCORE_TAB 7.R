@@ -6,7 +6,7 @@
 
 #########################################################
 ##                 Mitchell Kilborn                    ##
-##                 Arjun Viswanath                     ##
+##                 Arjun Vishwanath                    ##
 ##    Replication code for Table 7 included in:        ##
 ##    "Public Money Talks Too: Clean Elections         ##                  
 ##      and Representation in State Legislatures"      ##
@@ -62,7 +62,7 @@ loadRData <- function(fileName){
 #############################Set Directory#######################################
 ## Set working directory to folder containing all csv files
 ## run these libraries
-setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
+#setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
 library(tidyverse)
 library(readstata13)
 library(scales)

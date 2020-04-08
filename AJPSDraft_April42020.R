@@ -54,11 +54,11 @@ loadRData <- function(fileName){
   load(fileName)
   get(ls()[ls() != "fileName"])
 }
+
 #############################Set Directory#######################################
 ## Set working directory to folder containing all csv files
 ## Start from here.
-#setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP")
-setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
+#setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
 library(tidyverse)
 library(readstata13)
 library(scales)
