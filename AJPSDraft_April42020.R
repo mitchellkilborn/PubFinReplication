@@ -58,25 +58,27 @@ loadRData <- function(fileName){
 ## Set working directory to folder containing all csv files
 ## Start from here.
 #setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
-library(tidyverse)
-library(readstata13)
-library(scales)
-library(lfe)
-library(stargazer)
-library(sjPlot)
-library(stringdist)
-'%!in%' <- function(x,y)!('%in%'(x,y))
-substrRight <- function(x, n){##Reverse substring function
-  substr(x, nchar(x)-n+1, nchar(x))
-}
-row_rep <- function(df, n) {
-  df[rep(1:nrow(df), times = n),]
-}
-loadRData <- function(fileName){
-  #loads an RData file, and returns it
-  load(fileName)
-  get(ls()[ls() != "fileName"])
-}
+# library(tidyverse)
+# library(readstata13)
+# library(scales)
+# library(lfe)
+# library(stargazer)
+# library(sjPlot)
+# library(stringdist)
+# '%!in%' <- function(x,y)!('%in%'(x,y))
+# substrRight <- function(x, n){##Reverse substring function
+#   substr(x, nchar(x)-n+1, nchar(x))
+# }
+# row_rep <- function(df, n) {
+#   df[rep(1:nrow(df), times = n),]
+# }
+# loadRData <- function(fileName){
+#   #loads an RData file, and returns it
+#   load(fileName)
+#   get(ls()[ls() != "fileName"])
+# }
+
+#AV: This seems redundant with the code above?
 
 #############################CLEAN DATA#######################################
 
@@ -168,7 +170,7 @@ MRP<-bind_rows(SH02, SH12, SS02, SS12)%>%
 ## Need this data for valence analysis and
 ## competitiveness interaction analysis.
 
-## Had to covert Klarner's original dta object to RDS
+## Had to convert Klarner's original dta object to RDS
 ## format to be able to upload project to github
 ## while observing 100mb file limit.
 #election<-read.dta13("102slersuoacontest20181024-1.dta")
@@ -204,6 +206,8 @@ election_all<-election %>%
          WinnerT2VoteShare=ifelse(DemWin==1, Dem_T2VoteShare, WinnerT2VoteShare),
          WinnerT2VoteShare=ifelse(OthWin==1, Oth_T2VoteShare, WinnerT2VoteShare))
 
+#AV: Is this really calculating top two vote share by party? I thought it was just AZ, but even in other places you get 3 party shares in some districts. See 2012, Dist 33 in the CT Senate... looks like you just want this for winner's top two vote share, do I have that right?  
+#AV: Also, maybe do this with a case_when versus a ton of if_elses to save yourself complexity?
 
 ####Read in Public Financing Status List####
 
@@ -221,7 +225,7 @@ count_district<-ftm %>%
   mutate(House=ifelse(str_detect(Office, "HOUSE"), 1, 0), 
          Senate=ifelse(str_detect(Office, "SENATE"), 1, 0))%>%
   filter( (State=="ME" | State=="CT" | State=="AZ") & ( House==1 | Senate==1) & ## Select relevant states and chambers
-            ElectionStatus %!in% c("LOST-PRIMARY RUNOFF",#Grab self-financing GE contestants only only
+            ElectionStatus %!in% c("LOST-PRIMARY RUNOFF",#Grab self-financing GE contestants only
                                    "LOST-PRIMARY", "DISQUALIFIED-GENERAL",
                                    "WITHDREW-GENERAL") & ElectionType %!in% c("SPECIAL"))%>%##Drop special elections
   mutate(District=substr(Office, 16,18), District=ifelse(Senate==1,substr(Office, 17,19),District),##Grab district id numbers
@@ -237,7 +241,6 @@ count_district<-ftm %>%
   summarize(TotalCleanCan=n(), CleanWinner=sum(CleanWinner,na.rm = TRUE), CleanRepub=sum(CleanRepub, na.rm = TRUE), 
             CleanDem=sum(CleanDem, na.rm = TRUE), CleanOth=sum(CleanThirdParty, na.rm = TRUE), 
             CleanIncumbent=sum(Incumbent, na.rm = TRUE))##Count how many of each type in GE contest
-
 
 ## Join the election contest data with the district counts of clean candidates by 
 ## year, state, chamber, and district. Note, this generates NA counts
@@ -376,6 +379,8 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
   }
 }
 
+#AV: Dumb q but what's the difference bw tenure1 and tenure2 for Klarner?
+
 
 
 #### Merge Bonica Data to all datasets and prep final dataset####
@@ -385,6 +390,8 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
 
 can_fe<-left_join(election_allres, bonica_ftm, 
                   by=c("year"="cycle", "sab"="state", "sen"="Senate", "dno"="District"))
+
+
 
 
 
@@ -499,6 +506,9 @@ can_fe<-can_fe%>%mutate(
   year=as.factor(year))%>%
   filter(ran.general==1 )## Select general election candidates only
 
+#AV: General coding thing, but at each step in the lines above, you should probably only select to the variables you need. It's kind of unwieldy to work with a 160 column dataset, most of which isn't really necessary for the analysis. 
+# this logic test returns some multi incumbent districts, are these incumbent vs incumbent races? can_fe %>% group_by(year,sab,sen,dno) %>% summarize(count = sum(Incumbent))
+
 ####Code Candidate Clean First Run####
 
 ## To do SI-A7, we need an indicator for whether a candidate used public
@@ -590,6 +600,8 @@ look<-can_fe%>%filter(CensusLines==1)%>%
   group_by(sab, WonElection)%>%
   summarize(AverageCandidateTotal=mean(count,na.rm=TRUE))
 
+#AV: So you're telling me that in CT, there is an avg of 1.8 losers per cycle? I guess it depends on the cycle lengths (CT will be shorter if it starts in 08). So maybe you want to normalize this to divide by the number of eligible races in each census district. 
+
 ## Count how many district seats change hands between clean and not clean legislators 
 Changes<-can_fe%>%
    ## Select legislators and CensusLines
@@ -608,6 +620,7 @@ Changes<-can_fe%>%
                   count(sab,Contrast)%>%
                   mutate(Prop=prop.table(n))
 
+#AV: The Arizona count looks kind of low in this analysis, do you think that makes sense?
 
 ## Having thought more about the np_distance analysis, I realized I 
 ## was measuring it the wrong way previously. I had been including
@@ -622,6 +635,8 @@ Changes<-can_fe%>%
 ## It also doesn't make sense to include time trends because there is little
 ## variation within district over-time
 can_ideo<-can_fe%>%distinct(UniqueDistrict_CensusGroup,bonica.rid, .keep_all = TRUE)
+
+#AV: I'm not sure if this is quite right. There may be little variation within district-decades, but we probably want the 2 way FE setup (which only changes through legislator replacement). It should be extremely underpowered, but that's sort of the point, no?
 
 ## District Fixed Effects,Cluster SEs on District
 ## Subset to legislators and relevant district groups
@@ -674,9 +689,9 @@ stargazer(all_np,all_np_party,all_np_hasDistCF,
 ## In the final version of the code, will want to load RDS from here and select
 ## only the used variables because they make you provide a codebook for each
 ## variable in the dataset. 
-## final<-can_fe%>%select(year, sab, sen, dno,name,party,
-## bonica.rid,Distance_CFnonDyn, Distance_CFDyn, UniqueDistrict_CensusGroup,
-## CensusLines,CleanYear, RedistTime, etc)
+final<-can_fe%>%select(year, sab, sen, dno,name,party,
+bonica.rid,Distance_CFnonDyn, Distance_CFDyn, UniqueDistrict_CensusGroup,
+CensusLines,CleanYear, RedistTime)
 
 ####Table 2 Core Results####
 
@@ -789,6 +804,7 @@ ind_cf_rep<-felm(Distance_CFDyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistr
                  data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1& party==200 & HasDistanceCFDyn==1)
 summary(ind_cf_rep)
 
+#AV: Do you think this is wroth showing by party? Substantive effect sizes are the same but the N is tiny on each, it's not really doing much. We had it in the last version I think, so we can write in the memo why we removed it. 
 
 ## Format latex table
 stargazer(ind_cf,ind_cf_incumb,ind_cf_dem,ind_cf_rep,
@@ -887,6 +903,7 @@ DynR<-t.test(pairedRepsGC$Crecipient.cfscore.dyn, pairedRepsGC$UCrecipient.cfsco
 
 ## Create lm models to incorporate T-Test results into stargazer
 ## Can't figure out a simpler way to format these results nicely, any ideas?
+#AV: Nothing comes to mind here, seems like your way works haha
 modD<-modDDyn<-modR<-modRDyn<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store dynamic modD/RDyn and stable CFScore (modD/R) paired t-test results
@@ -920,8 +937,10 @@ stargazer(modD, modDDyn, modR, modRDyn,
           label=c("tab:CFscoreTTest"),
           covariate.labels =c("CFScore Difference"),
           multicolumn = FALSE,
-          omit.stat = c("rsq","adj.rsq","f","ser"))
+          omit.stat = c("rsq","adj.rsq","f","ser","n"),
+          add.lines = list(c("N",nonDynD$parameter+1,DynD$parameter+1,nonDynR$parameter+1,DynR$parameter+1)))
 
+#AV: I think I fixed this to automatically put the correct sample sizes in, let me know if this looks like what you had in mind
 
 ####Table 5 Paired T-Test Winner Ideology####
 
