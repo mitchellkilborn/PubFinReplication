@@ -804,7 +804,7 @@ ind_cf_rep<-felm(Distance_CFDyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistr
                  data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1& party==200 & HasDistanceCFDyn==1)
 summary(ind_cf_rep)
 
-#AV: Do you think this is wroth showing by party? Substantive effect sizes are the same but the N is tiny on each, it's not really doing much. We had it in the last version I think, so we can write in the memo why we removed it. 
+#AV: Do you think this is worth showing by party? Substantive effect sizes are the same but the N is tiny on each, it's not really doing much. We had it in the last version I think, so we can write in the memo why we removed it. 
 
 ## Format latex table
 stargazer(ind_cf,ind_cf_incumb,ind_cf_dem,ind_cf_rep,
