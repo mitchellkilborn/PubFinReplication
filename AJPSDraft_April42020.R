@@ -54,6 +54,7 @@ loadRData <- function(fileName){
   load(fileName)
   get(ls()[ls() != "fileName"])
 }
+
 #############################Set Directory#######################################
 ## Set working directory to folder containing all csv files
 ## Start from here.
