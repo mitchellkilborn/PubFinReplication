@@ -79,7 +79,7 @@ loadRData <- function(fileName){
 # }
 
 #AV: This seems redundant with the code above?
-
+#MK Yeah will drop, just left it in for my own clarity.
 #############################CLEAN DATA#######################################
 
 ####Clean MRP Data####
@@ -206,8 +206,18 @@ election_all<-election %>%
          WinnerT2VoteShare=ifelse(DemWin==1, Dem_T2VoteShare, WinnerT2VoteShare),
          WinnerT2VoteShare=ifelse(OthWin==1, Oth_T2VoteShare, WinnerT2VoteShare))
 
-#AV: Is this really calculating top two vote share by party? I thought it was just AZ, but even in other places you get 3 party shares in some districts. See 2012, Dist 33 in the CT Senate... looks like you just want this for winner's top two vote share, do I have that right?  
-#AV: Also, maybe do this with a case_when versus a ton of if_elses to save yourself complexity?
+#AV: Is this really calculating top two vote share by party? I thought it was
+#just AZ, but even in other places you get 3 party shares in some districts. See
+#2012, Dist 33 in the CT Senate... looks like you just want this for winner's
+#top two vote share, do I have that right? 
+#MK: We only need rvote+dvote out of this for valence ultimately, so we
+# could delete this. I hadn't deleted it because we will only save
+#the variables we will need to use for analysis in RDS. This was
+# constructed for the RDD analysis originally I think so not relevant now.
+#AV: Also, maybe do this with a
+#case_when versus a ton of if_elses to save yourself complexity?
+#MK I didn't know about case_when when I wrote this unfortunately
+
 
 ####Read in Public Financing Status List####
 
@@ -275,7 +285,6 @@ fixed2014<-read.csv("MissingGeneralElectionAZCTMEFixed.csv", stringsAsFactors = 
 
 fixedMissingParty<-read.csv("Bonica_2014_2016MissingParty_Fixed.csv", stringsAsFactors = FALSE)%>%select(bonica.rid, cycle, party_fixed)
 ## Missing incumbency variable 2016
-
 missingIncumbents2016<-read.csv("MissingIncumbency2016_fixed.csv", stringsAsFactors = FALSE)%>%
   select(bonica.rid, cycle, Incum.Chall_2016)%>%distinct(bonica.rid, cycle, .keep_all = TRUE)
 
@@ -284,7 +293,7 @@ missingIncumbents2016<-read.csv("MissingIncumbency2016_fixed.csv", stringsAsFact
 ## Read in Bonica candidate data matched to public financing data in CombineDimeFTM_All.R Files
 ## and merge with fixed datasets
 
-bonica_ftm<-readRDS("FTM_BONICA_MERGE_AddedThru2016_V3.RDS")%>%
+bonica_ftm<-readRDS("FTM_BONICA_MERGE_AddedThru2016_V4.RDS")%>%
   slice(-1)%>%## Drop empty first row
   mutate(cycle=as.numeric(cycle))%>%
   left_join(fixed2014,by=c("cycle"="cycle", "bonica.rid"="bonica.rid"))%>%
@@ -379,7 +388,11 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
   }
 }
 
-#AV: Dumb q but what's the difference bw tenure1 and tenure2 for Klarner?
+# AV: Dumb q but what's the difference bw tenure1 and tenure2 for Klarner?
+# MK Tenure 1: Years of Continuous Tenure in Chamber
+#    Tenure 2: Years of Continuous Tenure in Legislature
+# I also just added the Klarner codebooks to the branch repo if you
+# want to read about other variables
 
 
 
@@ -506,8 +519,19 @@ can_fe<-can_fe%>%mutate(
   year=as.factor(year))%>%
   filter(ran.general==1 )## Select general election candidates only
 
-#AV: General coding thing, but at each step in the lines above, you should probably only select to the variables you need. It's kind of unwieldy to work with a 160 column dataset, most of which isn't really necessary for the analysis. 
-# this logic test returns some multi incumbent districts, are these incumbent vs incumbent races? can_fe %>% group_by(year,sab,sen,dno) %>% summarize(count = sum(Incumbent))
+#AV: General coding thing, but at each step in the lines above, you should
+#probably only select to the variables you need. It's kind of unwieldy to work
+#with a 160 column dataset, most of which isn't really necessary for the
+#analysis.
+#MK, yeah will do that all in one call below
+#AV: this logic test returns some multi incumbent districts, are these
+#incumbent vs incumbent races? 
+#look<-can_fe %>% group_by(year,sab,sen,dno) %>%
+#summarize(count = sum(Incumbent))
+#MK found a few more duplicates in the 2014-2016 data, which created
+#multiple incumbents in a few districts. The leftover multi-incumbent observations
+# are genuine incumbent v. incumbent races after redistricting in AZ and ME
+# based on ballotpedia
 
 ####Code Candidate Clean First Run####
 
@@ -582,7 +606,7 @@ for(i in 1:nrow(can_fe)){
   ## Subset to relevant district lines data
 look<-can_fe%>%filter(CensusLines==1)%>%
   ## Sort within district and candidates years in which they won and lost
-  group_by(sab,UniqueDistrict_CensusGroup,bonica.rid,WonElection)%>%
+  group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,bonica.rid,WonElection)%>%
   ## Count number of observations 
   ## (creates rows for each candidates wins and losses if they have
   ## wins and losses in the data)
@@ -591,23 +615,48 @@ look<-can_fe%>%filter(CensusLines==1)%>%
   ## observation. top_n returns the row with the highest value in WonElection within district,
   ## so will return row where a bonica.rid won (WonElection==1) or 
   ## if the bonica.rid never won, the observation they have for a loss where WonElection==0
-  group_by(sab,UniqueDistrict_CensusGroup,bonica.rid)%>%
+  group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,bonica.rid)%>%
   top_n(1,WonElection)%>%
   ## Count up the numbers of winners and never winner candidates within each district
-  group_by(sab,UniqueDistrict_CensusGroup,WonElection)%>%
+  group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,WonElection)%>%
   summarize(count=n())%>%
   ## Average these counts by state
-  group_by(sab, WonElection)%>%
-  summarize(AverageCandidateTotal=mean(count,na.rm=TRUE))
+  group_by(sab, sen,Census_Group,WonElection)%>%
+  summarize(AverageCandidateTotal=sum(count,na.rm=TRUE)/n()) %>% 
+## Create variable with number of eligible race within each census group
+## then divide count of winners and never winners in each district by 
+## number of races per redistricting cycles we have data for
+  mutate(RacesPerRedist=case_when(
+          sab == "ME" & Census_Group== "Census2000"~5,
+          sab == "ME" & Census_Group==  "Census2010"~2,
+          sab == "CT" & Census_Group==  "Census2000"~2,
+          sab == "CT" & Census_Group==  "Census2010"~3,
+          sab == "AZ" & Census_Group==  "Census2000"~4,
+          sab == "AZ" & Census_Group==  "Census2010"~3),
+         AverageCandidateTotal=AverageCandidateTotal/RacesPerRedist)
+  
 
-#AV: So you're telling me that in CT, there is an avg of 1.8 losers per cycle? I guess it depends on the cycle lengths (CT will be shorter if it starts in 08). So maybe you want to normalize this to divide by the number of eligible races in each census district. 
+
+#AV: So you're telling me that in CT,
+#there is an avg of 1.8 losers per cycle?
+#I guess it depends on the cycle lengths
+#(CT will be shorter if it starts in 08). 
+#So maybe you want to normalize this to divide by the 
+#number of eligible races in each census district.
+#MK Connecticut is surprisingly uncompetitive for stateleg races.
+#Also probably a lot of the real contests in CT are in the Democratic primaries.
+#When normalizing by the number of eligibles race in each redistricting cycle
+#only AZ house has more than 1 unique winner per district per race per redistricting
+#cycle.
+  
+
 
 ## Count how many district seats change hands between clean and not clean legislators 
 Changes<-can_fe%>%
    ## Select legislators and CensusLines
          filter(WonElection==1 &CensusLines==1)%>%
    ## Group by state and district
-                  group_by(sab, UniqueDistrict_CensusGroup)%>%
+                  group_by(sab,UniqueDistrict_CensusGroup)%>%
    ## Pare data to observation of candidate by district
          distinct(UniqueDistrict_CensusGroup, bonica.rid, .keep_all = TRUE)%>%
    ## Count how many public financing statuses exist in a redistricting cycle 
@@ -620,10 +669,14 @@ Changes<-can_fe%>%
                   count(sab,Contrast)%>%
                   mutate(Prop=prop.table(n))
 
-#AV: The Arizona count looks kind of low in this analysis, do you think that makes sense?
+#AV: The Arizona count looks kind of low in this
+#analysis, do you think that makes sense?
+#MK Given the rates of Clean Elections participation
+#by party and the low number of split house districts,
+#60% of districts changing hands makes sense.
 
 ## Having thought more about the np_distance analysis, I realized I 
-## was measuring it the wrong way previously. I had been including
+## was maybe measuring it the wrong way previously. I had been including
 ## year fixed effects, when ideology doesn't vary within year for all but the
 ## AZ house districts. If we think it is plausible to just use district fixed
 ## effects and subset the data so we only see one observation of each unique
@@ -636,7 +689,22 @@ Changes<-can_fe%>%
 ## variation within district over-time
 can_ideo<-can_fe%>%distinct(UniqueDistrict_CensusGroup,bonica.rid, .keep_all = TRUE)
 
-#AV: I'm not sure if this is quite right. There may be little variation within district-decades, but we probably want the 2 way FE setup (which only changes through legislator replacement). It should be extremely underpowered, but that's sort of the point, no?
+#AV: I'm not sure if this is quite right. 
+#There may be little variation within district-decades, 
+#but we probably want the 2 way FE setup
+#(which only changes through legislator replacement). 
+#It should be extremely underpowered, but that's sort of the point, no?
+#MK I was thinking we could discuss the under-powered nature of the test
+# present the results with and without year effects. It would show
+# that the basic results are present with the NP-Scores as well, but using a two
+# way fe setup wipes out most of the usable variation. 
+# Also restricting the sample to unique legislators within redistricting 
+# cycle and the fact that legislator ideology scores
+# are stable means that year to year heterogeneity shouldn't be a problem that
+# we would have to control for. 
+# If this approach isn't plausible I will just talk about the low number
+# of district turnovers that make the NP analysis underpowered for ME and CT
+# particularly underpowered.
 
 ## District Fixed Effects,Cluster SEs on District
 ## Subset to legislators and relevant district groups
@@ -804,7 +872,13 @@ ind_cf_rep<-felm(Distance_CFDyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistr
                  data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1& party==200 & HasDistanceCFDyn==1)
 summary(ind_cf_rep)
 
-#AV: Do you think this is wroth showing by party? Substantive effect sizes are the same but the N is tiny on each, it's not really doing much. We had it in the last version I think, so we can write in the memo why we removed it. 
+#AV: Do you think this is wroth showing by party? Substantive effect sizes are
+#the same but the N is tiny on each, it's not really doing much. We had it in
+#the last version I think, so we can write in the memo why we removed it.
+#MK We subsetted to party here in Table 3 
+## because reviewer 3 asked us to in the last comment in
+#the feedback.
+
 
 ## Format latex table
 stargazer(ind_cf,ind_cf_incumb,ind_cf_dem,ind_cf_rep,
@@ -940,7 +1014,8 @@ stargazer(modD, modDDyn, modR, modRDyn,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
           add.lines = list(c("N",nonDynD$parameter+1,DynD$parameter+1,nonDynR$parameter+1,DynR$parameter+1)))
 
-#AV: I think I fixed this to automatically put the correct sample sizes in, let me know if this looks like what you had in mind
+#AV: I think I fixed this to automatically put the correct sample sizes in,
+#let me know if this looks like what you had in mind
 
 ####Table 5 Paired T-Test Winner Ideology####
 
