@@ -55,30 +55,6 @@ loadRData <- function(fileName){
   get(ls()[ls() != "fileName"])
 }
 
-#############################Set Directory#######################################
-## Set working directory to folder containing all csv files
-## Start from here.
-#setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
-library(tidyverse)
-library(readstata13)
-library(scales)
-library(lfe)
-library(stargazer)
-library(sjPlot)
-library(stringdist)
-'%!in%' <- function(x,y)!('%in%'(x,y))
-substrRight <- function(x, n){##Reverse substring function
-  substr(x, nchar(x)-n+1, nchar(x))
-}
-row_rep <- function(df, n) {
-  df[rep(1:nrow(df), times = n),]
-}
-loadRData <- function(fileName){
-  #loads an RData file, and returns it
-  load(fileName)
-  get(ls()[ls() != "fileName"])
-}
-
 #############################CLEAN DATA#######################################
 
 ####Clean MRP Data####
@@ -282,7 +258,7 @@ missingIncumbents2016<-read.csv("MissingIncumbency2016_fixed.csv", stringsAsFact
 ## Read in Bonica candidate data matched to public financing data in CombineDimeFTM_All.R Files
 ## and merge with fixed datasets
 
-bonica_ftm<-readRDS("FTM_BONICA_MERGE_AddedThru2016_V3.RDS")%>%
+bonica_ftm<-readRDS("FTM_BONICA_MERGE_AddedThru2016_V4.RDS")%>%
   slice(-1)%>%## Drop empty first row
   mutate(cycle=as.numeric(cycle))%>%
   left_join(fixed2014,by=c("cycle"="cycle", "bonica.rid"="bonica.rid"))%>%
@@ -549,6 +525,22 @@ for(i in 1:nrow(can_fe)){
 
 
 
+## Select variables used in below analysis
+can_fe<-can_fe%>%
+  select(year, sab, sen, dno,name,party,
+         bonica.rid,Distance_CFnonDyn, Distance_CFDyn, 
+         UniqueDistrict_CensusGroup,
+         CensusLines,CleanYear, RedistTime,WonElection, 
+         CleanFirstRun,HasDistanceCFDyn, HasDistanceCFnonDyn,
+         PFStatusSwitcher,Incumbent, seat, 
+         recipient.cfscore,NP_Score,Distance_NP,
+         recipient.cfscore.dyn,ran.general,
+         HasDynamicCF,RepubIndicator,CompetitiveInteraction,
+         tenure1, Distance_DWDIME, HasDistanceDWDIME)
+
+#### Load can_fe from here####
+#saveRDS(can_fe, file="can_fe.RDS")
+can_fe<-readRDS("can_fe.RDS")
 
 
 
@@ -570,10 +562,10 @@ for(i in 1:nrow(can_fe)){
 ## there are on average more than 2 candidates per redistricting cycle in the
 ## Census2000 lines, but not in the Census2010 lines.
 
-  ## Subset to relevant district lines data
+## Subset to relevant district lines data
 look<-can_fe%>%filter(CensusLines==1)%>%
   ## Sort within district and candidates years in which they won and lost
-  group_by(sab,UniqueDistrict_CensusGroup,bonica.rid,WonElection)%>%
+  group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,bonica.rid,WonElection)%>%
   ## Count number of observations 
   ## (creates rows for each candidates wins and losses if they have
   ## wins and losses in the data)
@@ -582,33 +574,43 @@ look<-can_fe%>%filter(CensusLines==1)%>%
   ## observation. top_n returns the row with the highest value in WonElection within district,
   ## so will return row where a bonica.rid won (WonElection==1) or 
   ## if the bonica.rid never won, the observation they have for a loss where WonElection==0
-  group_by(sab,UniqueDistrict_CensusGroup,bonica.rid)%>%
+  group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,bonica.rid)%>%
   top_n(1,WonElection)%>%
   ## Count up the numbers of winners and never winner candidates within each district
-  group_by(sab,UniqueDistrict_CensusGroup,WonElection)%>%
+  group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,WonElection)%>%
   summarize(count=n())%>%
   ## Average these counts by state
-  group_by(sab, WonElection)%>%
-  summarize(AverageCandidateTotal=mean(count,na.rm=TRUE))
+  group_by(sab, sen,Census_Group,WonElection)%>%
+  summarize(AverageCandidateTotal=sum(count,na.rm=TRUE)/n()) %>% 
+  ## Create variable with number of eligible race within each census group
+  ## then divide count of winners and never winners in each district by 
+  ## number of races per redistricting cycles we have data for
+  mutate(RacesPerRedist=case_when(
+    sab == "ME" & Census_Group== "Census2000"~5,
+    sab == "ME" & Census_Group==  "Census2010"~2,
+    sab == "CT" & Census_Group==  "Census2000"~2,
+    sab == "CT" & Census_Group==  "Census2010"~3,
+    sab == "AZ" & Census_Group==  "Census2000"~4,
+    sab == "AZ" & Census_Group==  "Census2010"~3),
+    AverageCandidateTotal=AverageCandidateTotal/RacesPerRedist)
 
 ## Count how many district seats change hands between clean and not clean legislators 
 Changes<-can_fe%>%
-   ## Select legislators and CensusLines
-         filter(WonElection==1 &CensusLines==1)%>%
-   ## Group by state and district
-                  group_by(sab, UniqueDistrict_CensusGroup)%>%
-   ## Pare data to observation of candidate by district
-         distinct(UniqueDistrict_CensusGroup, bonica.rid, .keep_all = TRUE)%>%
-   ## Count how many public financing statuses exist in a redistricting cycle 
-   ## (does the district change from clean to not clean legislator)
-                  summarize(ChangeDistricts=n_distinct(CleanFirstRun,na.rm=TRUE))%>%
-   ## Calculate if there is contrast in public financing status for a district
-                  mutate(Contrast=ifelse(ChangeDistricts>1,1,0))%>%
-   ## Calculate what combination of districts ever change hands (i.e. Contrast is 1)
-   ## for each state.
-                  count(sab,Contrast)%>%
-                  mutate(Prop=prop.table(n))
-
+  ## Select legislators and CensusLines
+  filter(WonElection==1 &CensusLines==1)%>%
+  ## Group by state, census redistricting cycle, and district
+  group_by(sab,Census_Group,UniqueDistrict_CensusGroup)%>%
+  ## Pare data to observation of candidate by district
+  distinct(UniqueDistrict_CensusGroup, bonica.rid, .keep_all = TRUE)%>%
+  ## Count how many public financing statuses exist in a redistricting cycle 
+  ## (does the district change from clean to not clean legislator)
+  summarize(ChangeDistricts=n_distinct(CleanFirstRun,na.rm=TRUE))%>%
+  ## Calculate if there is contrast in public financing status for a district
+  mutate(Contrast=ifelse(ChangeDistricts>1,1,0))%>%
+  ## Calculate what combination of districts ever change hands (i.e. Contrast is 1)
+  ## for each state.
+  count(sab,Contrast)%>%
+  mutate(Prop=prop.table(n))
 
 ## Having thought more about the np_distance analysis, I realized I 
 ## was measuring it the wrong way previously. I had been including
@@ -671,13 +673,6 @@ stargazer(all_np,all_np_party,all_np_hasDistCF,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
 
-
-## In the final version of the code, will want to load RDS from here and select
-## only the used variables because they make you provide a codebook for each
-## variable in the dataset. 
-## final<-can_fe%>%select(year, sab, sen, dno,name,party,
-## bonica.rid,Distance_CFnonDyn, Distance_CFDyn, UniqueDistrict_CensusGroup,
-## CensusLines,CleanYear, RedistTime, etc)
 
 ####Table 2 Core Results####
 
@@ -900,10 +895,7 @@ modRDyn$coefficients[1]<-DynR$estimate[[1]]
 
 ## Create line for observations
 ## Have to add back one due to degree of freedom calculation, not sure how to pull out total
-## observations from T-test object. Have to remember to edit t-test results to reflect proper
-## observation totals before publication
-
-paste("N", "&", nonDynD$parameter+1, "&", DynD$parameter+1, "&", nonDynR$parameter+1, "&", DynR$parameter+1, sep=" ")
+## observations from T-test object.
 
 ## Create latex table with results
 stargazer(modD, modDDyn, modR, modRDyn,
@@ -921,7 +913,8 @@ stargazer(modD, modDDyn, modR, modRDyn,
           label=c("tab:CFscoreTTest"),
           covariate.labels =c("CFScore Difference"),
           multicolumn = FALSE,
-          omit.stat = c("rsq","adj.rsq","f","ser"))
+          omit.stat = c("rsq","adj.rsq","f","ser","n"),
+          add.lines = list(c("N",nonDynD$parameter+1,DynD$parameter+1,nonDynR$parameter+1,DynR$parameter+1)))
 
 
 ####Table 5 Paired T-Test Winner Ideology####
@@ -954,12 +947,10 @@ modRDyn$coefficients[1]<-DynR$estimate[[1]]
 ## Create line for observations
 ## Have to add back one due to degree of freedom calculation, not sure how to pull out total
 ## observations from T-test object
-paste("N", "&", nonDynD$parameter+1, "&", DynD$parameter+1, "&", nonDynR$parameter+1, "&", DynR$parameter+1, sep=" ")
 stargazer(modD, modDDyn, modR, modRDyn,
           se=list(nonDynD$stderr, DynD$stderr, nonDynR$stderr, DynR$stderr),
           p=list(nonDynD$p.value, DynD$p.value, nonDynR$p.value, DynR$p.value),
           model.names = FALSE, model.numbers = FALSE,
-          # dep.var.labels.include = FALSE,
           dep.var.labels = c("Stable CFScore", "Dynamic CFScore", "Stable CFScore", "Dynamic CFScore"),
           column.labels   = c("Democratic Candidates", "Republican Candidates"),
           column.separate = c(2,2),
@@ -971,7 +962,8 @@ stargazer(modD, modDDyn, modR, modRDyn,
           label=c("tab:CFscoreTTest"),
           covariate.labels =c("CFScore Difference"),
           multicolumn = FALSE,
-          omit.stat = c("rsq","adj.rsq","f","ser"))
+          omit.stat = c("rsq","adj.rsq","f","ser","n"),
+          add.lines = list(c("N",  nonDynD$parameter+1, DynD$parameter+1, nonDynR$parameter+1, DynR$parameter+1)))
 
 #### Table 6 Paired T-Test Ideological Distance GE Candidates####
 
@@ -990,7 +982,6 @@ modDyn$coefficients[1]<-Dyn$estimate[[1]]
 ## Have to add back one due to degree of freedom calculation,
 ## not sure how to pull out total
 ## observations from T-test object
-paste("N", "&",Dyn$parameter+1,  "&", nonDyn$parameter+1, sep=" ")
 stargazer(modDyn, modNonDyn, 
           se=list(Dyn$stderr,nonDyn$stderr),
           p=list(Dyn$p.value, nonDyn$p.value),
@@ -1007,7 +998,8 @@ stargazer(modDyn, modNonDyn,
           label=c("tab:DistanceTTest"),
           covariate.labels =c("Ideological Distance Diff."),
           multicolumn = FALSE,
-          omit.stat = c("rsq","adj.rsq","f","ser"))
+          omit.stat = c("rsq","adj.rsq","f","ser", "n"),
+          add.lines = list(c("N",Dyn$parameter+1, nonDyn$parameter+1)))
 
 ####Table 7 NP-Score Analysis####
 ## See NP_Score_Tab7.R script which 

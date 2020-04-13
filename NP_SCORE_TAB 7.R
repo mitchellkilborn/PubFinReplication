@@ -59,30 +59,6 @@ loadRData <- function(fileName){
   load(fileName)
   get(ls()[ls() != "fileName"])
 }
-#############################Set Directory#######################################
-## Set working directory to folder containing all csv files
-## run these libraries
-#setwd("~/Documents/Harvard/G_Semester2/PUB_FIN_REP/ReplicationFiles")
-library(tidyverse)
-library(readstata13)
-library(scales)
-library(lfe)
-library(stargazer)
-library(sjPlot)
-library(stringdist)
-library(xtable)
-'%!in%' <- function(x,y)!('%in%'(x,y))
-substrRight <- function(x, n){##Reverse substring function
-  substr(x, nchar(x)-n+1, nchar(x))
-}
-row_rep <- function(df, n) {
-  df[rep(1:nrow(df), times = n),]
-}
-loadRData <- function(fileName){
-  #loads an RData file, and returns it
-  load(fileName)
-  get(ls()[ls() != "fileName"])
-}
 
 #############################Clean Data#######################################
 
@@ -367,11 +343,9 @@ modDistTest$coefficients[1]<-npDistTest$estimate[[1]]
 
 
 ## Stargazer for NP Scores
-## Create line for observations
 ## Also must move 1st row third column to second row third column,
 ## can't get stargazer to move standard error and coefficient, but 
 ## DV is different in third column from first two.
-paste("N", "&", dtest$parameter+1, "&", rtest$parameter+1, "&", npDistTest$parameter+1, sep=" ")
 stargazer(modDTest, modRTest, modDistTest, 
           se=list(dtest$stderr, rtest$stderr, npDistTest$stderr),
           p=list(dtest$p.value, rtest$p.value, npDistTest$p.value),
@@ -388,7 +362,8 @@ stargazer(modDTest, modRTest, modDistTest,
           label=c("NPDistance TTest"),
           covariate.labels =c("NP Score Diff.", "Ideological Distance"),
           multicolumn = FALSE,
-          omit.stat = c("rsq","adj.rsq","f","ser"))
+          omit.stat = c("rsq","adj.rsq","f","ser", "n"),
+          add.lines = list(c("N", dtest$parameter+1, rtest$parameter+1, npDistTest$parameter+1)))
 
 
 
