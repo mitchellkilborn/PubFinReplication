@@ -655,7 +655,7 @@ Changes<-can_fe%>%
    ## Select legislators and CensusLines
          filter(WonElection==1 &CensusLines==1)%>%
    ## Group by state and district
-                  group_by(sab,UniqueDistrict_CensusGroup)%>%
+                  group_by(sab,Census_Group,UniqueDistrict_CensusGroup)%>%
    ## Pare data to observation of candidate by district
          distinct(UniqueDistrict_CensusGroup, bonica.rid, .keep_all = TRUE)%>%
    ## Count how many public financing statuses exist in a redistricting cycle
@@ -717,7 +717,7 @@ can_ideo<-can_fe%>%distinct(UniqueDistrict_CensusGroup,bonica.rid, .keep_all = T
 ## always clean or had more clean years
 ## than non-clean years.
 all_np<-felm(Distance_NP~CleanFirstRun|UniqueDistrict_CensusGroup|0|UniqueDistrict_CensusGroup,
-             data=can_ideo, subset=CensusLines==1 & WonElection==1 )
+             data=can_ideo, subset=CensusLines==1 & WonElection==1)
 summary(all_np)
 
 ## District Fixed Effects, Clean First Run (IV), Cluster SEs on District, Party Indicator
