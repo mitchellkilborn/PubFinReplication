@@ -181,19 +181,6 @@ election_all<-election %>%
          WinnerT2VoteShare=ifelse(DemWin==1, Dem_T2VoteShare, WinnerT2VoteShare),
          WinnerT2VoteShare=ifelse(OthWin==1, Oth_T2VoteShare, WinnerT2VoteShare))
 
-#AV: Is this really calculating top two vote share by party? I thought it was
-#just AZ, but even in other places you get 3 party shares in some districts. See
-#2012, Dist 33 in the CT Senate... looks like you just want this for winner's
-#top two vote share, do I have that right?
-#MK: We only need rvote+dvote out of this for valence ultimately, so we
-# could delete this. I hadn't deleted it because we will only save
-#the variables we will need to use for analysis in RDS. This was
-# constructed for the RDD analysis originally I think so not relevant now.
-#AV: Also, maybe do this with a
-#case_when versus a ton of if_elses to save yourself complexity?
-#MK I didn't know about case_when when I wrote this unfortunately
-
-
 ####Read in Public Financing Status List####
 
 ## Public financing  list gathered from https://www.followthemoney.org/
@@ -363,13 +350,6 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
   }
 }
 
-# AV: Dumb q but what's the difference bw tenure1 and tenure2 for Klarner?
-# MK Tenure 1: Years of Continuous Tenure in Chamber
-#    Tenure 2: Years of Continuous Tenure in Legislature
-# I also just added the Klarner codebooks to the branch repo if you
-# want to read about other variables
-
-
 
 #### Merge Bonica Data to all datasets and prep final dataset####
 
@@ -494,20 +474,6 @@ can_fe<-can_fe%>%mutate(
   year=as.factor(year))%>%
   filter(ran.general==1 )## Select general election candidates only
 
-#AV: General coding thing, but at each step in the lines above, you should
-#probably only select to the variables you need. It's kind of unwieldy to work
-#with a 160 column dataset, most of which isn't really necessary for the
-#analysis.
-#MK, yeah will do that all in one call below
-#AV: this logic test returns some multi incumbent districts, are these
-#incumbent vs incumbent races?
-#look<-can_fe %>% group_by(year,sab,sen,dno) %>%
-#summarize(count = sum(Incumbent))
-#MK found a few more duplicates in the 2014-2016 data, which created
-#multiple incumbents in a few districts. The leftover multi-incumbent observations
-# are genuine incumbent v. incumbent races after redistricting in AZ and ME
-# based on ballotpedia
-
 ####Code Candidate Clean First Run####
 
 ## To do SI-A7, we need an indicator for whether a candidate used public
@@ -562,6 +528,7 @@ can_fe<-can_fe%>%
   select(year, sab, sen, dno,name,party,
          bonica.rid,Distance_CFnonDyn, Distance_CFDyn,
          UniqueDistrict_CensusGroup,
+         Census_Group, #need to include this for calcs below
          CensusLines,CleanYear, RedistTime,WonElection,
          CleanFirstRun,HasDistanceCFDyn, HasDistanceCFnonDyn,
          PFStatusSwitcher,Incumbent, seat,
@@ -949,12 +916,6 @@ modDDyn$coefficients[1]<-DynD$estimate[[1]]
 modR$coefficients[1]<-nonDynR$estimate[[1]]
 modRDyn$coefficients[1]<-DynR$estimate[[1]]
 
-
-
-## Create line for observations
-## Have to add back one due to degree of freedom calculation, not sure how to pull out total
-## observations from T-test object.
-
 ## Create latex table with results
 stargazer(modD, modDDyn, modR, modRDyn,
           se=list(nonDynD$stderr, DynD$stderr, nonDynR$stderr, DynR$stderr),
@@ -983,33 +944,30 @@ stargazer(modD, modDDyn, modR, modRDyn,
 ## legislator same-party, same year, same district pairs
 ## Calculate difference in ideology using dynamic and stable estimates by party
 
+#AV: added _W after to distinguish winners from above (don't think we should overwrite what we did above)
+#AV: as i go through, i realized this happens a decent amt. not sure if this is worth fixing or not
 
 ## Non-dynamic estimates
-nonDynD<-t.test(pairedDemsW$Crecipient.cfscore, pairedDemsW$UCrecipient.cfscore, paired=TRUE)
-nonDynR<-t.test(pairedRepsW$Crecipient.cfscore, pairedRepsW$UCrecipient.cfscore, paired=TRUE)
+nonDynD_W<-t.test(pairedDemsW$Crecipient.cfscore, pairedDemsW$UCrecipient.cfscore, paired=TRUE)
+nonDynR_W<-t.test(pairedRepsW$Crecipient.cfscore, pairedRepsW$UCrecipient.cfscore, paired=TRUE)
 
 ## dynamic estimates
-DynD<-t.test(pairedDemsW$Crecipient.cfscore.dyn, pairedDemsW$UCrecipient.cfscore.dyn, paired=TRUE)
-DynR<-t.test(pairedRepsW$Crecipient.cfscore.dyn, pairedRepsW$UCrecipient.cfscore.dyn, paired=TRUE)
+DynD_W<-t.test(pairedDemsW$Crecipient.cfscore.dyn, pairedDemsW$UCrecipient.cfscore.dyn, paired=TRUE)
+DynR_W<-t.test(pairedRepsW$Crecipient.cfscore.dyn, pairedRepsW$UCrecipient.cfscore.dyn, paired=TRUE)
 
 
 ## Create lm models to incorporate T-Test results into stargazer
-modD<-modDDyn<-modR<-modRDyn<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
+modD_W<-modDDyn_W<-modR_W<-modRDyn_W<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store Estimate
-modD$coefficients[1]<-nonDynD$estimate[[1]]
-modDDyn$coefficients[1]<-DynD$estimate[[1]]
-modR$coefficients[1]<-nonDynR$estimate[[1]]
-modRDyn$coefficients[1]<-DynR$estimate[[1]]
+modD_W$coefficients[1]<-nonDynD_W$estimate[[1]]
+modDDyn_W$coefficients[1]<-DynD_W$estimate[[1]]
+modR_W$coefficients[1]<-nonDynR_W$estimate[[1]]
+modRDyn_W$coefficients[1]<-DynR_W$estimate[[1]]
 
-
-
-## Create line for observations
-## Have to add back one due to degree of freedom calculation, not sure how to pull out total
-## observations from T-test object
-stargazer(modD, modDDyn, modR, modRDyn,
-          se=list(nonDynD$stderr, DynD$stderr, nonDynR$stderr, DynR$stderr),
-          p=list(nonDynD$p.value, DynD$p.value, nonDynR$p.value, DynR$p.value),
+stargazer(modD_W, modDDyn_W, modR_W, modRDyn_W,
+          se=list(nonDynD_W$stderr, DynD_W$stderr, nonDynR_W$stderr, DynR_W$stderr),
+          p=list(nonDynD_W$p.value, DynD_W$p.value, nonDynR_W$p.value, DynR_W$p.value),
           model.names = FALSE, model.numbers = FALSE,
           dep.var.labels = c("Stable CFScore", "Dynamic CFScore", "Stable CFScore", "Dynamic CFScore"),
           column.labels   = c("Democratic Candidates", "Republican Candidates"),
@@ -1023,7 +981,7 @@ stargazer(modD, modDDyn, modR, modRDyn,
           covariate.labels =c("CFScore Difference"),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
-          add.lines = list(c("N",  nonDynD$parameter+1, DynD$parameter+1, nonDynR$parameter+1, DynR$parameter+1)))
+          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1, nonDynR_W$parameter+1, DynR_W$parameter+1)))
 
 #### Table 6 Paired T-Test Ideological Distance GE Candidates####
 
@@ -1105,8 +1063,11 @@ stargazer(Missing,
 
 ## Interact candidate incumbency status with clean election status
 incumb_cf<-felm(Distance_CFDyn~CleanYear*Incumbent|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
-                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
+                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1 & RedistTime > 2) 
 summary(incumb_cf)
+
+#AV: I wrote this in the side code, but you probably want to exclude people who just got redistricted as "Incumbents".
+#    Results still hold. What do you think? Either way, we should note in a footnote that it's not affected by our specification. 
 
 ## Incumbency marginal effects plot
 incumb_cf_MarginalEffect<-plot_model(incumb_cf)$data%>%
@@ -1151,6 +1112,7 @@ ggplot(party_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
         text=element_text(size=16, face="bold"))
 
 ## Competitive Election (+|-10% vote share) Interaction Analysis
+#AV: you mean 20%, right? your specification says if they got less than 60%. so in 2 way vote share, that's <20%. 
 compet_cf<-felm(Distance_CFDyn~CompetitiveInteraction|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
                 data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
 summary(compet_cf)
@@ -1217,8 +1179,12 @@ pooledSE <- sqrt((((nObs[1] - 1) * az_cf$cse[1] ^ 2) + ((nObs[2] - 1) * ct_cf$cs
                  /
                    (sum(nObs) - 3))
 
+#AV: We should note that the sample standard deviations are fairly similar to justify our use of a pooled statistic vs an unpooled one. Although tbh it wouldn't make a huge difference. 
+
 ## Averaged coef T-stat
-AvgCoef/pooledSE
+tstat = AvgCoef/pooledSE
+df = (sum(nObs) - 3)
+1-pt(tstat,df=df) #p-value
 
 ## Create latex table for state by state regression
 stargazer(all_cf,az_cf, ct_cf, me_cf,
@@ -1310,10 +1276,13 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## DistanceCFDyn estimate
 
 
+#AV: I don't think this makes a difference, but why do you need to also subset on HasDistanceCFDyn for the first analysis here?
+
 ##Pooled States: DW-DIME Distance Estimate
 all_dwdime<-felm(Distance_DWDIME~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
                  data=can_fe, subset=CensusLines==1 & HasDistanceDWDIME==1 & HasDistanceCFDyn==1)
 summary(all_dwdime)
+
 
 ## Pooled States: Repeat Table 2 column 1 analysis, subsetting to data which is
 ## used in DW-DIME estimate for comparison.
@@ -1407,8 +1376,10 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## and re-estimate Table 2.
 
 ## Calculate IPW
-weights<-can_fe%>%filter(CensusLines==1)%>%
+weights<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
   group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
+
+#AV: I think your weights need to be a function of the data usable. I tried this out with HasDistanceCFDyn==1. Are there other criteria we need to use too? And if this is right, prob need to duplicate with the nonDyn scores as well
 
 ## Join weights to can_fe and subset to relevant data
 ## Have to create dyn and ndyn subsets because lfe
@@ -1545,7 +1516,7 @@ valence<-election_allres%>%
 ## by redistricting cycle specific standard errors.
 valence_mod_rep<-felm(RepVS~CleanFactor+dinc+rinc+oinc+ocand+dcand+rcand|
                         year:sab+UniqueDistrict_CensusGroup|0|UniqueDistrict_CensusGroup, data=valence,
-                      subset=CensusLines==1 )
+                      subset=CensusLines==1)
 summary(valence_mod_rep)
 
 ## Valence Analysis: Regress Republican Voteshare on Indicators, add district x
@@ -1604,13 +1575,15 @@ election_all<-election %>%
          ocand=ifelse(sab=="AZ"& sen==0, ocand*2, ocand),
          dcand=ifelse(sab=="AZ"& sen==0, dcand*2, dcand),
   ## Use eseats variable to calculate number of incumbents in all districts
-  ## because of multi-membr problem noted above
+  ## because of multi-member problem noted above
          IncumbentInRace=rinc*eseats+dinc*eseats+oinc*eseats,
   ## Calculate total candidates and number of challengers within district-year observations
          TotalCan=rcand+ocand+dcand, Challengers=TotalCan-IncumbentInRace)
 
   ## Select incumbent challenger count variables
 inc_count<-election_all%>%select(sab, year, sen, dno, IncumbentInRace, TotalCan, Challengers)
+
+#AV: Do you need this inc_count thing?
 
 ## Summarize candidate counts by party
 election_all<-election_all%>%group_by(sab, year, sen, dno)%>%
