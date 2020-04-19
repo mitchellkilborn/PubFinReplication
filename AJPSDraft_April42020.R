@@ -634,9 +634,7 @@ look<-can_fe%>%filter(CensusLines==1)%>%
           sab == "CT" & Census_Group==  "Census2010"~3,
           sab == "AZ" & Census_Group==  "Census2000"~4,
           sab == "AZ" & Census_Group==  "Census2010"~3),
-         AverageCandidateTotal=AverageCandidateTotal/RacesPerRedist)
-
-
+         AverageCandidateTotal2=AverageCandidateTotal/RacesPerRedist * 5) #AV: multiplied by 5 so it's easier to think about candidates per cycle
 
 #AV: So you're telling me that in CT,
 #there is an avg of 1.8 losers per cycle?
@@ -675,6 +673,7 @@ Changes<-can_fe%>%
 #MK Given the rates of Clean Elections participation
 #by party and the low number of split house districts,
 #60% of districts changing hands makes sense.
+#AV: No I mean the sample sizes, not the actual proportion. The count column.
 
 ## Having thought more about the np_distance analysis, I realized I
 ## was maybe measuring it the wrong way previously. I had been including
@@ -706,6 +705,7 @@ can_ideo<-can_fe%>%distinct(UniqueDistrict_CensusGroup,bonica.rid, .keep_all = T
 # If this approach isn't plausible I will just talk about the low number
 # of district turnovers that make the NP analysis underpowered for ME and CT
 # particularly underpowered.
+# AV: Sure, we can discuss on the next call
 
 ## District Fixed Effects,Cluster SEs on District
 ## Subset to legislators and relevant district groups
