@@ -18,7 +18,7 @@
 
 rm(list=ls())
 # install required packages if they are missing:
-list.of.packages <- c("tidyverse", "stargazer","scales","sjPlot", "lfe")
+list.of.packages <- c("tidyverse", "stargazer","scales","sjPlot", "lfe","readstata13","stringdist")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])];
 if(length(new.packages)){install.packages(new.packages)}
 lapply(list.of.packages, require, character.only = TRUE)

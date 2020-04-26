@@ -2,7 +2,7 @@
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
 ##    Replication code for tables included in:         ##
-##    "Public Money Talks Too: Clean Elections         ##                  
+##    "Public Money Talks Too: Clean Elections         ##
 ##      and Representation in State Legislatures"      ##
 #########################################################
 
@@ -62,7 +62,7 @@ loadRData <- function(fileName){
 ## MRP: http://www.americanideologyproject.com/
 ## Stack MRP Estimates for each redistricting cycle for upper and lower chambers to merge with
 ## candidate ideology estimates below
-## Create vector of years with same length as one year's worth of observations of 
+## Create vector of years with same length as one year's worth of observations of
 ## the MRP dataset. (ie 2000, 2000...2000, 2002)
 ## Select relevant states
 ## Mark Sen=0 for lower chamber,  Sen=1 for upper chamber.
@@ -78,7 +78,7 @@ SH02<-read.csv("SH02_2015UPDATE.csv", stringsAsFactors = FALSE)%>%
          District=as.numeric(shd_fips)-as.numeric(state_fips)*1000)%>%
   row_rep(6)%>%
   mutate(Election_Year=Years2000House)%>%
-  filter((abb=="AZ" & Election_Year %in% c(2004:2010)) | 
+  filter((abb=="AZ" & Election_Year %in% c(2004:2010)) |
            (abb=="ME" & Election_Year %in% c(2004:2012)) |
            (abb=="CT" & Election_Year %in% c(2002:2010)) )%>%
   select(abb, Sen, District, Election_Year, mrp_mean)
@@ -93,7 +93,7 @@ SS02<-read.csv("SS02_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
          District=as.numeric(ssd_fips)-as.numeric(state_fips)*1000)%>%
   row_rep(6)%>%
   mutate(Election_Year=Years2000Senate)%>%
-  filter((abb=="AZ" & Election_Year %in% c(2004:2010)) | 
+  filter((abb=="AZ" & Election_Year %in% c(2004:2010)) |
            (abb=="ME" & Election_Year %in% c(2004:2012))|
            (abb=="CT" & Election_Year %in% c(2002:2010)))%>%
   select(abb, Sen, District, Election_Year, mrp_mean)
@@ -107,7 +107,7 @@ SH12<-read.csv("SH12_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
          District=as.numeric(shd_fips)-as.numeric(state_fips)*1000)%>%
   row_rep(3)%>%
   mutate(Election_Year=Years2010House)%>%
-  filter((abb=="AZ" & Election_Year %in% c(2012:2016)) | 
+  filter((abb=="AZ" & Election_Year %in% c(2012:2016)) |
            (abb=="ME" & Election_Year %in% c(2014:2016))|
            (abb=="CT" & Election_Year %in% c(2012:2016)))%>%
   select(abb, Sen, District, Election_Year, mrp_mean)
@@ -121,7 +121,7 @@ SS12<-read.csv("SS12_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
          District=as.numeric(ssd_fips)-as.numeric(state_fips)*1000)%>%
   row_rep(3)%>%
   mutate(Election_Year=Years2010Senate)%>%
-  filter((abb=="AZ" & Election_Year %in% c(2012:2016)) | 
+  filter((abb=="AZ" & Election_Year %in% c(2012:2016)) |
            (abb=="ME" & Election_Year %in% c(2014:2016))|
            (abb=="CT" & Election_Year %in% c(2012:2016)))%>%
   select(abb, Sen, District, Election_Year, mrp_mean)
@@ -145,7 +145,7 @@ MRP<-bind_rows(SH02, SH12, SS02, SS12)%>%
 ## Need this data for valence analysis and
 ## competitiveness interaction analysis.
 
-## Had to covert Klarner's original dta object to RDS
+## Had to convert Klarner's original dta object to RDS
 ## format to be able to upload project to github
 ## while observing 100mb file limit.
 #election<-read.dta13("102slersuoacontest20181024-1.dta")
@@ -156,13 +156,13 @@ election<-readRDS("102slersuoacontest20181024-1.RDS")
 election_all<-election %>%
   filter( (year>=2000 &  sab == "ME") | (year>=2008 & sab=="CT") |
             (year>=2000 &  sab == "AZ") ) %>%
-  
+
   ## Select relevant variables
-  
-  select(year, sab, sen, dno, dvote, rvote, ovote, dcand, 
+
+  select(year, sab, sen, dno, dvote, rvote, ovote, dcand,
          rcand, ocand, dinc, rinc, oinc, dwin, rwin, owin, dinc2, rinc2, oinc2, dinc3,rinc3,oinc3)%>%
-  
-  ## Calculate top 2 vote share based on possible combinations of candidates 
+
+  ## Calculate top 2 vote share based on possible combinations of candidates
   ## (1 Rep, 1 Dem, 1 Oth or 1 Rep and 1 Dem) (Need this for competitiveness analysis)
   mutate(Top2Votes=ifelse(dvote>0 & rvote>0 & dvote>ovote & rvote>ovote, rvote+dvote, 0),##RDO/DRO
          Top2Votes=ifelse(dvote>0 & rvote==0 & ovote==0, dvote, Top2Votes),##D
@@ -174,13 +174,12 @@ election_all<-election %>%
          Top2Votes=ifelse(rvote>0 & ovote>0 & ovote>dvote & rvote>dvote , rvote+ovote, Top2Votes),##ROD
          Rep_T2VoteShare=rvote/Top2Votes, Dem_T2VoteShare=dvote/Top2Votes, Oth_T2VoteShare=ovote/Top2Votes,##Calculate party share of top 2 votes
          RepInT2=ifelse(rvote>ovote, 1, 0), DemInT2=ifelse(dvote>ovote,1,0), OthInTop2=ifelse(ovote>dvote | ovote>rvote,1,0),##Indicator for whether party is in top 2
-         RepWin=ifelse(rvote> ovote & rvote>dvote,1,0), DemWin=ifelse(dvote>rvote& dvote>ovote,1,0), 
+         RepWin=ifelse(rvote> ovote & rvote>dvote,1,0), DemWin=ifelse(dvote>rvote& dvote>ovote,1,0),
          OthWin=ifelse(ovote>dvote & ovote>rvote,1,0),##Create indicators for which party candidate won
   ## Calculate winner top 2 voteshare (Use Rep, Dem, Oth)
-         WinnerT2VoteShare=ifelse(RepWin==1, Rep_T2VoteShare, 0), 
+         WinnerT2VoteShare=ifelse(RepWin==1, Rep_T2VoteShare, 0),
          WinnerT2VoteShare=ifelse(DemWin==1, Dem_T2VoteShare, WinnerT2VoteShare),
          WinnerT2VoteShare=ifelse(OthWin==1, Oth_T2VoteShare, WinnerT2VoteShare))
-
 
 ####Read in Public Financing Status List####
 
@@ -194,11 +193,11 @@ ftm$GeneralParty[which(ftm$Name=="MCDOUGAL, VALERIE M")]<-"REPUBLICAN"
 ## need this quantity for valence analysis
 
 count_district<-ftm %>%
-  ## Create indicators for House and Senate observations 
-  mutate(House=ifelse(str_detect(Office, "HOUSE"), 1, 0), 
+  ## Create indicators for House and Senate observations
+  mutate(House=ifelse(str_detect(Office, "HOUSE"), 1, 0),
          Senate=ifelse(str_detect(Office, "SENATE"), 1, 0))%>%
   filter( (State=="ME" | State=="CT" | State=="AZ") & ( House==1 | Senate==1) & ## Select relevant states and chambers
-            ElectionStatus %!in% c("LOST-PRIMARY RUNOFF",#Grab self-financing GE contestants only only
+            ElectionStatus %!in% c("LOST-PRIMARY RUNOFF",#Grab self-financing GE contestants only
                                    "LOST-PRIMARY", "DISQUALIFIED-GENERAL",
                                    "WITHDREW-GENERAL") & ElectionType %!in% c("SPECIAL"))%>%##Drop special elections
   mutate(District=substr(Office, 16,18), District=ifelse(Senate==1,substr(Office, 17,19),District),##Grab district id numbers
@@ -211,12 +210,11 @@ count_district<-ftm %>%
          CleanThirdParty=ifelse(GeneralParty=="THIRD-PARTY",1,0))%>%## Create indicator for clean third party
   arrange(State, Senate, Year, District)%>%
   group_by(State, Senate, Year, District)%>%
-  summarize(TotalCleanCan=n(), CleanWinner=sum(CleanWinner,na.rm = TRUE), CleanRepub=sum(CleanRepub, na.rm = TRUE), 
-            CleanDem=sum(CleanDem, na.rm = TRUE), CleanOth=sum(CleanThirdParty, na.rm = TRUE), 
+  summarize(TotalCleanCan=n(), CleanWinner=sum(CleanWinner,na.rm = TRUE), CleanRepub=sum(CleanRepub, na.rm = TRUE),
+            CleanDem=sum(CleanDem, na.rm = TRUE), CleanOth=sum(CleanThirdParty, na.rm = TRUE),
             CleanIncumbent=sum(Incumbent, na.rm = TRUE))##Count how many of each type in GE contest
 
-
-## Join the election contest data with the district counts of clean candidates by 
+## Join the election contest data with the district counts of clean candidates by
 ## year, state, chamber, and district. Note, this generates NA counts
 ## of public financing candidates in contests
 ## which saw no clean candidates
@@ -242,14 +240,13 @@ election_allres<-left_join(election_allres, MRP, by=c("year"="Election_Year", "s
 
 ## Missing ran.general for 2014
 fixed2014<-read.csv("MissingGeneralElectionAZCTMEFixed.csv", stringsAsFactors = FALSE)%>%
-  distinct(bonica.rid, .keep_all=TRUE)%>% 
+  distinct(bonica.rid, .keep_all=TRUE)%>%
   select(-c(name,district, seat,state, X, MissingCandidates_2014))%>%
   mutate(ran.general_2014=ifelse(is.na(ran.general_2014),0, ran.general_2014))## Convert empty cells to 0
 ## Missing party for 2014-2016
 
 fixedMissingParty<-read.csv("Bonica_2014_2016MissingParty_Fixed.csv", stringsAsFactors = FALSE)%>%select(bonica.rid, cycle, party_fixed)
 ## Missing incumbency variable 2016
-
 missingIncumbents2016<-read.csv("MissingIncumbency2016_fixed.csv", stringsAsFactors = FALSE)%>%
   select(bonica.rid, cycle, Incum.Chall_2016)%>%distinct(bonica.rid, cycle, .keep_all = TRUE)
 
@@ -264,7 +261,7 @@ bonica_ftm<-readRDS("FTM_BONICA_MERGE_AddedThru2016_V4.RDS")%>%
   left_join(fixed2014,by=c("cycle"="cycle", "bonica.rid"="bonica.rid"))%>%
   left_join(fixedMissingParty,by=c("cycle"="cycle", "bonica.rid"="bonica.rid"))%>%
   left_join(missingIncumbents2016,by=c("cycle"="cycle", "bonica.rid"="bonica.rid"))%>%
-  
+
   ## Replace missing fields in bonica_ftm with hand-coded data for relevant years.
 
   mutate(ran.general=ifelse(cycle==2014,ran.general_2014, ran.general),
@@ -293,13 +290,13 @@ load("196slers1967to2016_20180908.RData")
 table<-table %>%
   filter( ( (year>=2000 &  sab == "me") | (year>=2008 & sab=="ct") | (year>=2000 &  sab == "az") ) &
             (tenure1>0 | tenure2>0))%>%## select only observations which have any tenure
-  mutate(state=toupper(sab), Senate=sen, District=dno, election=as.character(year), 
+  mutate(state=toupper(sab), Senate=sen, District=dno, election=as.character(year),
          Partyk=party,## Rename party variable for merging purposes
          combName=paste0(last,first), ## Combine the first and last name for string distance match method
          NameMatchDistance=NA)%>% ## Create holder variable for Name Match Distance
-  
+
   ## Select relevant variables
-  
+
   select(state, Senate, District,election, tenure1, tenure2,combName, Partyk,outcome,NameMatchDistance)%>%
   arrange(state,Senate,District,election)
 
@@ -313,12 +310,12 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
   subBonica<-bonica_ftm[i,]## Select ith row
   ## Non-incumbents don't have tenure, so skip
   if(subBonica$Incum.Chall!="I" | is.na(subBonica$Incum.Chall)==TRUE){next}
-  
+
   ## Subset Klarner data to district, chamber, state, and year of candidate from bonica data
-  
-  subKlarner<-table%>%filter(state==subBonica$state & District==subBonica$District & 
+
+  subKlarner<-table%>%filter(state==subBonica$state & District==subBonica$District &
                                election==subBonica$election & Senate==subBonica$Senate)
-  
+
   ## If no observations in the bonica data
   ## cell for Klarner, enter 0 for tenure
   if(nrow(subKlarner)==0){
@@ -327,7 +324,7 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
   }
   ## If there is only one observation in that cell for Klarner
   ## (Ie every non AZ house district) assign tenure values for bonica data
-  
+
   if(nrow(subKlarner)==1){
     bonica_ftm$tenure1[i]<-subKlarner$tenure1
     bonica_ftm$tenure2[i]<-subKlarner$tenure2
@@ -336,16 +333,16 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
   ## If there are multiple incumbents, i.e. Arizona house districts
   ## use minimum of name distance between Bonica and Klarner name
   ## to get tenure information
-  
+
   if(nrow(subKlarner)>1){
     for(j in 1:nrow(subKlarner)){
-      
+
       ## Calculate distance between Bonica and Klarner name and store in subKlarner
       subKlarner$NameMatchDistance[j]<-stringdist(subBonica$name, subKlarner$combName[j])
     }
     ## Subset Klarner to string which is best match for name
     subKlarner<-subKlarner[which.min(subKlarner$NameMatchDistance),]
-    
+
     ## Assign tenure values for bonica data based on best match
     bonica_ftm$tenure1[i]<-subKlarner$tenure1
     bonica_ftm$tenure2[i]<-subKlarner$tenure2
@@ -354,14 +351,15 @@ for(i in 1:nrow(bonica_ftm)){## Iterate through rows of bonica dataset
 }
 
 
-
 #### Merge Bonica Data to all datasets and prep final dataset####
 
 ## election_allres contains mrp scores, candidate and contest level result variables
 ## bonica_ftm contains state leg candidates, their public financing status and bonica ideology
 
-can_fe<-left_join(election_allres, bonica_ftm, 
+can_fe<-left_join(election_allres, bonica_ftm,
                   by=c("year"="cycle", "sab"="state", "sen"="Senate", "dno"="District"))
+
+
 
 
 
@@ -403,7 +401,7 @@ can_fe<-can_fe%>%mutate(
   ## Fix Clean Winner where FTM had no clean cans running in a district,
   ## so binding FTM to election results produces NAs
   CleanWinner=ifelse(is.na(CleanWinner)==TRUE,0,CleanWinner),
-  ## Similarly, if candidate is not listed in public financing list, 
+  ## Similarly, if candidate is not listed in public financing list,
   ## they get an NA on CleanYear, so mark as 0
   CleanYear=ifelse(is.na(CleanYear)==TRUE,0,CleanYear),
   ## Create indicator for whether candidate won race
@@ -454,7 +452,7 @@ can_fe<-can_fe%>%mutate(
   CensusLines=ifelse(is.na(Census_Group)==TRUE,0,1),
   ## Create Chamber factor
   Chamber=as.factor(ifelse(sen==1, "Senate", "House")),
-  ## Create state chamber 
+  ## Create state chamber
   StateChamber=as.factor(paste0(sab, Chamber)),
   ## Create state-chamber-district factor levels
   UniqueDistrict=ifelse(sab=="CT", paste0("CT", UniqueDistrictChamber), paste0("ME",UniqueDistrictChamber)),##Create CT and ME district specific indicators
@@ -470,7 +468,7 @@ can_fe<-can_fe%>%mutate(
   ## these will be marked in the next section
   CleanFirstRun=0,
   PFStatusSwitcher=0,
-  ## Make year a factor class to create state-year effects 
+  ## Make year a factor class to create state-year effects
   ## (lfe requires one variable in fixed effects
   ## interaction to be a factor variable)
   year=as.factor(year))%>%
@@ -483,28 +481,28 @@ can_fe<-can_fe%>%mutate(
 ## candidate switched public financing status between campaign cycles
 
 for(i in 1:nrow(can_fe)){
-  
+
   ## Subset to ith row/candidate and get their bonica.rid
   id_sub<-can_fe$bonica.rid[i]
-  
+
   ## Grab all instances of candidate and arrange by year ascending
   dat_sub<-can_fe%>%filter(bonica.rid==id_sub)%>%arrange(year)
-  
+
   ## If they are an incumbent in 2000, they couldn't have entered
   ## legislature with clean elections, so mark them as a 0 for clean from start
   if(dat_sub$year[1]==2000 & dat_sub$Incumbent[1]==1){
-    can_fe$CleanFirstRun[i]<-0 
+    can_fe$CleanFirstRun[i]<-0
     next
   }
-  ## Put the public financing status of a candidate's first run into the 
+  ## Put the public financing status of a candidate's first run into the
   ## the ith row, which may be first or subsequent runs.
   can_fe$CleanFirstRun[i]<-dat_sub$CleanYear[1]
-  
+
   ## If they switch status at any time, they will have a 1 and 0
   ## in the CleanYear column
   ## so the unique values in dat_sub$CleanYear
   ## will have more than 1 value. Mark these people as switchers.
-  
+
   if(length(unique(dat_sub$CleanYear))>1){
     can_fe$PFStatusSwitcher[i]<-1
   }
@@ -516,7 +514,7 @@ for(i in 1:nrow(can_fe)){
 ## a zero for CleanYear After matching the bonica data and FTM data I checked to
 ## see which names in FTM weren't in the matched data and added those in to the
 ## Bonica data, about 40 cases. So all names on the public financing list which
-## have a matching candidate in the bonica data are in the matched data, bonica_ftm 
+## have a matching candidate in the bonica data are in the matched data, bonica_ftm
 ## I checked visually the first 200 matches and the last 100 matches
 ## to ensure they are correct and the match
 ## rate is 100%, so I feel good about the quality of this procedure.
@@ -528,11 +526,12 @@ for(i in 1:nrow(can_fe)){
 ## Select variables used in below analysis
 can_fe<-can_fe%>%
   select(year, sab, sen, dno,name,party,
-         bonica.rid,Distance_CFnonDyn, Distance_CFDyn, 
+         bonica.rid,Distance_CFnonDyn, Distance_CFDyn,
          UniqueDistrict_CensusGroup,
-         CensusLines,CleanYear, RedistTime,WonElection, 
+         Census_Group, #need to include this for calcs below
+         CensusLines,CleanYear, RedistTime,WonElection,
          CleanFirstRun,HasDistanceCFDyn, HasDistanceCFnonDyn,
-         PFStatusSwitcher,Incumbent, seat, 
+         PFStatusSwitcher,Incumbent, seat,
          recipient.cfscore,NP_Score,Distance_NP,
          recipient.cfscore.dyn,ran.general,
          HasDynamicCF,RepubIndicator,CompetitiveInteraction,
@@ -550,15 +549,15 @@ can_fe<-readRDS("can_fe.RDS")
 ## legislators and unique never succesful legislative candidates
 ## exist within each district for the Census 2000 and Census2010 data
 ## Note that the bonica data is missing about 20 legislators from
-## 2014 and 2016 for CT and ME respectively. This is due to 
+## 2014 and 2016 for CT and ME respectively. This is due to
 ## missingness in the bonica update data we received.
 ## Because CT is limited to 2 cycles in the Census 2000 and 3 cycles
 ## in the Census2010 data, we rarely see districts change hands
-## and especially rarely see a district go from being represented 
+## and especially rarely see a district go from being represented
 ## by a clean candidate to a non-clean candidate and vice versa
-## (see Changes object below). Perhaps worth 
+## (see Changes object below). Perhaps worth
 ## discussing in the memo?
-## Because of term limits in Maine, 
+## Because of term limits in Maine,
 ## there are on average more than 2 candidates per redistricting cycle in the
 ## Census2000 lines, but not in the Census2010 lines.
 
@@ -566,13 +565,13 @@ can_fe<-readRDS("can_fe.RDS")
 look<-can_fe%>%filter(CensusLines==1)%>%
   ## Sort within district and candidates years in which they won and lost
   group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,bonica.rid,WonElection)%>%
-  ## Count number of observations 
+  ## Count number of observations
   ## (creates rows for each candidates wins and losses if they have
   ## wins and losses in the data)
   summarize(count=n())%>%
   ## Group within bonica.rid so we can use top_n function to select 1 candidate-district
   ## observation. top_n returns the row with the highest value in WonElection within district,
-  ## so will return row where a bonica.rid won (WonElection==1) or 
+  ## so will return row where a bonica.rid won (WonElection==1) or
   ## if the bonica.rid never won, the observation they have for a loss where WonElection==0
   group_by(sab,sen,Census_Group,UniqueDistrict_CensusGroup,bonica.rid)%>%
   top_n(1,WonElection)%>%
@@ -581,9 +580,9 @@ look<-can_fe%>%filter(CensusLines==1)%>%
   summarize(count=n())%>%
   ## Average these counts by state
   group_by(sab, sen,Census_Group,WonElection)%>%
-  summarize(AverageCandidateTotal=sum(count,na.rm=TRUE)/n()) %>% 
+  summarize(AverageCandidateTotal=sum(count,na.rm=TRUE)/n()) %>%
   ## Create variable with number of eligible race within each census group
-  ## then divide count of winners and never winners in each district by 
+  ## then divide count of winners and never winners in each district by
   ## number of races per redistricting cycles we have data for
   mutate(RacesPerRedist=case_when(
     sab == "ME" & Census_Group== "Census2000"~5,
@@ -594,7 +593,7 @@ look<-can_fe%>%filter(CensusLines==1)%>%
     sab == "AZ" & Census_Group==  "Census2010"~3),
     AverageCandidateTotal=AverageCandidateTotal/RacesPerRedist)
 
-## Count how many district seats change hands between clean and not clean legislators 
+## Count how many district seats change hands between clean and not clean legislators
 Changes<-can_fe%>%
   ## Select legislators and CensusLines
   filter(WonElection==1 &CensusLines==1)%>%
@@ -602,7 +601,7 @@ Changes<-can_fe%>%
   group_by(sab,Census_Group,UniqueDistrict_CensusGroup)%>%
   ## Pare data to observation of candidate by district
   distinct(UniqueDistrict_CensusGroup, bonica.rid, .keep_all = TRUE)%>%
-  ## Count how many public financing statuses exist in a redistricting cycle 
+  ## Count how many public financing statuses exist in a redistricting cycle
   ## (does the district change from clean to not clean legislator)
   summarize(ChangeDistricts=n_distinct(CleanFirstRun,na.rm=TRUE))%>%
   ## Calculate if there is contrast in public financing status for a district
@@ -612,19 +611,37 @@ Changes<-can_fe%>%
   count(sab,Contrast)%>%
   mutate(Prop=prop.table(n))
 
-## Having thought more about the np_distance analysis, I realized I 
-## was measuring it the wrong way previously. I had been including
+## Having thought more about the np_distance analysis, I realized I
+## was maybe measuring it the wrong way previously. I had been including
 ## year fixed effects, when ideology doesn't vary within year for all but the
 ## AZ house districts. If we think it is plausible to just use district fixed
 ## effects and subset the data so we only see one observation of each unique
 ## legislator within the district, we find effect sizes similar
-## to those in Table 2, albeit with less precise SEs. 
+## to those in Table 2, albeit with less precise SEs.
 
 ## Select unique candidate observations within district-cycle Don't include year
 ## fixed effects because no within year, within district variation in CT and ME
 ## It also doesn't make sense to include time trends because there is little
 ## variation within district over-time
 can_ideo<-can_fe%>%distinct(UniqueDistrict_CensusGroup,bonica.rid, .keep_all = TRUE)
+
+#AV: I'm not sure if this is quite right.
+#There may be little variation within district-decades,
+#but we probably want the 2 way FE setup
+#(which only changes through legislator replacement).
+#It should be extremely underpowered, but that's sort of the point, no?
+#MK I was thinking we could discuss the under-powered nature of the test
+# present the results with and without year effects. It would show
+# that the basic results are present with the NP-Scores as well, but using a two
+# way fe setup wipes out most of the usable variation.
+# Also restricting the sample to unique legislators within redistricting
+# cycle and the fact that legislator ideology scores
+# are stable means that year to year heterogeneity shouldn't be a problem that
+# we would have to control for.
+# If this approach isn't plausible I will just talk about the low number
+# of district turnovers that make the NP analysis underpowered for ME and CT
+# particularly underpowered.
+# AV: Sure, we can discuss on the next call
 
 ## District Fixed Effects,Cluster SEs on District
 ## Subset to legislators and relevant district groups
@@ -636,7 +653,7 @@ can_ideo<-can_fe%>%distinct(UniqueDistrict_CensusGroup,bonica.rid, .keep_all = T
 ## always clean or had more clean years
 ## than non-clean years.
 all_np<-felm(Distance_NP~CleanFirstRun|UniqueDistrict_CensusGroup|0|UniqueDistrict_CensusGroup,
-             data=can_ideo, subset=CensusLines==1 & WonElection==1 )
+             data=can_ideo, subset=CensusLines==1 & WonElection==1)
 summary(all_np)
 
 ## District Fixed Effects, Clean First Run (IV), Cluster SEs on District, Party Indicator
@@ -739,7 +756,7 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
                            c("Party Fixed Effects", "", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark"),
                            c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
-          
+
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
@@ -758,8 +775,8 @@ look<-can_fe%>%filter(CensusLines==1)
 x<-as.data.frame(xtabs(~CleanYear+bonica.rid, data=look))%>%filter(Freq>0)
 switchers<-length(which(table(x$bonica.rid)>1))
 all<-x%>%filter(CleanYear==1)%>%count()%>%pull()
-paste0("Out of ", all, " candidates who ever use public financing, ", switchers, 
-       " candidates switched financing status at some point ", 
+paste0("Out of ", all, " candidates who ever use public financing, ", switchers,
+       " candidates switched financing status at some point ",
        "(", round(100*switchers/all, digits=2), "\\%)")
 
 
@@ -784,6 +801,13 @@ summary(ind_cf_dem)
 ind_cf_rep<-felm(Distance_CFDyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                  data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1& party==200 & HasDistanceCFDyn==1)
 summary(ind_cf_rep)
+
+#AV: Do you think this is wroth showing by party? Substantive effect sizes are
+#the same but the N is tiny on each, it's not really doing much. We had it in
+#the last version I think, so we can write in the memo why we removed it.
+#MK We subsetted to party here in Table 3
+## because reviewer 3 asked us to in the last comment in
+#the feedback.
 
 
 ## Format latex table
@@ -817,11 +841,11 @@ aztest<-can_fe%>%filter(sab=="AZ")%>%
   select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,NP_Score,Distance_NP,
          recipient.cfscore.dyn,ran.general,CleanYear,CleanFirstRun,
          Distance_CFDyn,Distance_CFnonDyn, WonElection)%>%
-  ## Convert year to numeric from factor to facilitate merging 
+  ## Convert year to numeric from factor to facilitate merging
   mutate(year=as.numeric(as.character(year)))
 
 ## Select Clean Elections Candidates who competed in general election
-## Add C to front of all columns to make clear which columns 
+## Add C to front of all columns to make clear which columns
 ## are clean candidates observations
 
 clean<-aztest%>%filter(CleanYear==1)
@@ -834,7 +858,7 @@ colnames(clean)<-paste0("C", colnames(clean))
 unclean<-aztest%>%filter(CleanYear==0)
 colnames(unclean)<-paste0("UC", colnames(unclean))
 
-## Create versions of clean and unclean dataframes subset to winners 
+## Create versions of clean and unclean dataframes subset to winners
 ## and general election candidates respectively
 
 cleanGenCan<-clean%>%filter(Cran.general==1)
@@ -883,6 +907,7 @@ DynR<-t.test(pairedRepsGC$Crecipient.cfscore.dyn, pairedRepsGC$UCrecipient.cfsco
 
 ## Create lm models to incorporate T-Test results into stargazer
 ## Can't figure out a simpler way to format these results nicely, any ideas?
+#AV: Nothing comes to mind here, seems like your way works haha
 modD<-modDDyn<-modR<-modRDyn<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store dynamic modD/RDyn and stable CFScore (modD/R) paired t-test results
@@ -890,12 +915,6 @@ modD$coefficients[1]<-nonDynD$estimate[[1]]
 modDDyn$coefficients[1]<-DynD$estimate[[1]]
 modR$coefficients[1]<-nonDynR$estimate[[1]]
 modRDyn$coefficients[1]<-DynR$estimate[[1]]
-
-
-
-## Create line for observations
-## Have to add back one due to degree of freedom calculation, not sure how to pull out total
-## observations from T-test object.
 
 ## Create latex table with results
 stargazer(modD, modDDyn, modR, modRDyn,
@@ -916,6 +935,8 @@ stargazer(modD, modDDyn, modR, modRDyn,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
           add.lines = list(c("N",nonDynD$parameter+1,DynD$parameter+1,nonDynR$parameter+1,DynR$parameter+1)))
 
+#AV: I think I fixed this to automatically put the correct sample sizes in,
+#let me know if this looks like what you had in mind
 
 ####Table 5 Paired T-Test Winner Ideology####
 
@@ -923,33 +944,30 @@ stargazer(modD, modDDyn, modR, modRDyn,
 ## legislator same-party, same year, same district pairs
 ## Calculate difference in ideology using dynamic and stable estimates by party
 
+#AV: added _W after to distinguish winners from above (don't think we should overwrite what we did above)
+#AV: as i go through, i realized this happens a decent amt. not sure if this is worth fixing or not
 
 ## Non-dynamic estimates
-nonDynD<-t.test(pairedDemsW$Crecipient.cfscore, pairedDemsW$UCrecipient.cfscore, paired=TRUE)
-nonDynR<-t.test(pairedRepsW$Crecipient.cfscore, pairedRepsW$UCrecipient.cfscore, paired=TRUE)
+nonDynD_W<-t.test(pairedDemsW$Crecipient.cfscore, pairedDemsW$UCrecipient.cfscore, paired=TRUE)
+nonDynR_W<-t.test(pairedRepsW$Crecipient.cfscore, pairedRepsW$UCrecipient.cfscore, paired=TRUE)
 
 ## dynamic estimates
-DynD<-t.test(pairedDemsW$Crecipient.cfscore.dyn, pairedDemsW$UCrecipient.cfscore.dyn, paired=TRUE)
-DynR<-t.test(pairedRepsW$Crecipient.cfscore.dyn, pairedRepsW$UCrecipient.cfscore.dyn, paired=TRUE)
+DynD_W<-t.test(pairedDemsW$Crecipient.cfscore.dyn, pairedDemsW$UCrecipient.cfscore.dyn, paired=TRUE)
+DynR_W<-t.test(pairedRepsW$Crecipient.cfscore.dyn, pairedRepsW$UCrecipient.cfscore.dyn, paired=TRUE)
 
 
 ## Create lm models to incorporate T-Test results into stargazer
-modD<-modDDyn<-modR<-modRDyn<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
+modD_W<-modDDyn_W<-modR_W<-modRDyn_W<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store Estimate
-modD$coefficients[1]<-nonDynD$estimate[[1]]
-modDDyn$coefficients[1]<-DynD$estimate[[1]]
-modR$coefficients[1]<-nonDynR$estimate[[1]]
-modRDyn$coefficients[1]<-DynR$estimate[[1]]
+modD_W$coefficients[1]<-nonDynD_W$estimate[[1]]
+modDDyn_W$coefficients[1]<-DynD_W$estimate[[1]]
+modR_W$coefficients[1]<-nonDynR_W$estimate[[1]]
+modRDyn_W$coefficients[1]<-DynR_W$estimate[[1]]
 
-
-
-## Create line for observations
-## Have to add back one due to degree of freedom calculation, not sure how to pull out total
-## observations from T-test object
-stargazer(modD, modDDyn, modR, modRDyn,
-          se=list(nonDynD$stderr, DynD$stderr, nonDynR$stderr, DynR$stderr),
-          p=list(nonDynD$p.value, DynD$p.value, nonDynR$p.value, DynR$p.value),
+stargazer(modD_W, modDDyn_W, modR_W, modRDyn_W,
+          se=list(nonDynD_W$stderr, DynD_W$stderr, nonDynR_W$stderr, DynR_W$stderr),
+          p=list(nonDynD_W$p.value, DynD_W$p.value, nonDynR_W$p.value, DynR_W$p.value),
           model.names = FALSE, model.numbers = FALSE,
           dep.var.labels = c("Stable CFScore", "Dynamic CFScore", "Stable CFScore", "Dynamic CFScore"),
           column.labels   = c("Democratic Candidates", "Republican Candidates"),
@@ -963,7 +981,7 @@ stargazer(modD, modDDyn, modR, modRDyn,
           covariate.labels =c("CFScore Difference"),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
-          add.lines = list(c("N",  nonDynD$parameter+1, DynD$parameter+1, nonDynR$parameter+1, DynR$parameter+1)))
+          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1, nonDynR_W$parameter+1, DynR_W$parameter+1)))
 
 #### Table 6 Paired T-Test Ideological Distance GE Candidates####
 
@@ -982,7 +1000,7 @@ modDyn$coefficients[1]<-Dyn$estimate[[1]]
 ## Have to add back one due to degree of freedom calculation,
 ## not sure how to pull out total
 ## observations from T-test object
-stargazer(modDyn, modNonDyn, 
+stargazer(modDyn, modNonDyn,
           se=list(Dyn$stderr,nonDyn$stderr),
           p=list(Dyn$p.value, nonDyn$p.value),
           model.names = FALSE, model.numbers = FALSE,
@@ -1002,20 +1020,20 @@ stargazer(modDyn, modNonDyn,
           add.lines = list(c("N",Dyn$parameter+1, nonDyn$parameter+1)))
 
 ####Table 7 NP-Score Analysis####
-## See NP_Score_Tab7.R script which 
+## See NP_Score_Tab7.R script which
 ## merges NP scores to public financing candidate status list
 ## Can't just use the NP_Scores from can_fe because
 ## can_fe doesn't include np_scores for legislators in 2000,2002 in AZ
 ## and also has more missingness from the bonica data
 ## in 2012 and 2014 than if
 ## we combine the public financing list and the np_scores.
-## Results are substantively identical however if we use can_fe 
+## Results are substantively identical however if we use can_fe
 ## np_scores
 
 
 ####SI-A2 Evaluate differences between legislators with and without CFScores####
 
-## Regress NP-Score on indicator for whether a legislator had a dynamic CFScore. 
+## Regress NP-Score on indicator for whether a legislator had a dynamic CFScore.
 ## Include party, state, and year fixed effects, cluster SEs by state.
 ## No significant difference in legislator ideology by CF-Score missingness
 Missing<-felm(NP_Score~HasDynamicCF|party+sab+year|0|sab, data=can_fe)
@@ -1045,16 +1063,19 @@ stargazer(Missing,
 
 ## Interact candidate incumbency status with clean election status
 incumb_cf<-felm(Distance_CFDyn~CleanYear*Incumbent|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
-                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
+                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1 & RedistTime > 2) 
 summary(incumb_cf)
- 
+
+#AV: I wrote this in the side code, but you probably want to exclude people who just got redistricted as "Incumbents".
+#    Results still hold. What do you think? Either way, we should note in a footnote that it's not affected by our specification. 
+
 ## Incumbency marginal effects plot
 incumb_cf_MarginalEffect<-plot_model(incumb_cf)$data%>%
   mutate(term=recode(term,"Incumbent" ="Privately Funded Incumbent",
                      "CleanYear"="Publicly Funded Challenger",
                      "CleanYear:Incumbent"="Publicly Funded Incumbent"),
          term=as.factor(term),
-         term=fct_relevel(term, "Privately Funded Incumbent", "Publicly Funded Incumbent", 
+         term=fct_relevel(term, "Privately Funded Incumbent", "Publicly Funded Incumbent",
                           "Publicly Funded Challenger"))
 
 ggplot(incumb_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
@@ -1091,6 +1112,7 @@ ggplot(party_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
         text=element_text(size=16, face="bold"))
 
 ## Competitive Election (+|-10% vote share) Interaction Analysis
+#AV: you mean 20%, right? your specification says if they got less than 60%. so in 2 way vote share, that's <20%. 
 compet_cf<-felm(Distance_CFDyn~CompetitiveInteraction|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
                 data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
 summary(compet_cf)
@@ -1152,16 +1174,20 @@ AvgCoef<-(az_cf$coefficients[1]+ct_cf$coefficients[1]+me_cf$coefficients[1])/3
 
 ## Calculate pooled standard errors
 
-pooledSE <- sqrt((((nObs[1] - 1) * az_cf$cse[1] ^ 2) + ((nObs[2] - 1) * ct_cf$cse[1] ^2) 
+pooledSE <- sqrt((((nObs[1] - 1) * az_cf$cse[1] ^ 2) + ((nObs[2] - 1) * ct_cf$cse[1] ^2)
                   + ((nObs[3] - 1) * me_cf$cse[1] ^ 2))
                  /
                    (sum(nObs) - 3))
 
+#AV: We should note that the sample standard deviations are fairly similar to justify our use of a pooled statistic vs an unpooled one. Although tbh it wouldn't make a huge difference. 
+
 ## Averaged coef T-stat
-AvgCoef/pooledSE
+tstat = AvgCoef/pooledSE
+df = (sum(nObs) - 3)
+1-pt(tstat,df=df) #p-value
 
 ## Create latex table for state by state regression
-stargazer(all_cf,az_cf, ct_cf, me_cf, 
+stargazer(all_cf,az_cf, ct_cf, me_cf,
           model.names = FALSE, model.numbers = TRUE,
           dep.var.labels.include = FALSE,
           dep.var.labels = c("Dynamic CFScore Distance"),
@@ -1183,7 +1209,7 @@ stargazer(all_cf,az_cf, ct_cf, me_cf,
 ####SI-A5 Legislator Tenure analysis####
 
 ## Add tenure variable to Table 2 models
-## Pooled States: Dynamic distance estimate, district and year fixed effects, 
+## Pooled States: Dynamic distance estimate, district and year fixed effects,
 ## Standard errors clustered on redistricting cycle specific districts
 ## Subset data to 2000 and 2010 redistricting cycle data and observations
 ## which have a dynamic CF distance estimate
@@ -1202,7 +1228,7 @@ all_dyn_party_trend<-felm(Distance_CFDyn~CleanYear+tenure1|UniqueDistrict_Census
 summary(all_dyn_party_trend)
 
 
-## Pooled States: Non-dynamic distance estimate, district and year fixed effects, 
+## Pooled States: Non-dynamic distance estimate, district and year fixed effects,
 ## Standard errors clustered on redistricting cycle specific districts
 ## Subset data to 2000 and 2010 redistricting cycle data and observations
 ## which have a stable CF distance estimate
@@ -1250,10 +1276,13 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## DistanceCFDyn estimate
 
 
+#AV: I don't think this makes a difference, but why do you need to also subset on HasDistanceCFDyn for the first analysis here?
+
 ##Pooled States: DW-DIME Distance Estimate
 all_dwdime<-felm(Distance_DWDIME~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
                  data=can_fe, subset=CensusLines==1 & HasDistanceDWDIME==1 & HasDistanceCFDyn==1)
 summary(all_dwdime)
+
 
 ## Pooled States: Repeat Table 2 column 1 analysis, subsetting to data which is
 ## used in DW-DIME estimate for comparison.
@@ -1337,18 +1366,20 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
                            c("Party Fixed Effects", "", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark"),
                            c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
-          
+
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
 ####SI-A8 Weighting Analysis####
 
 ## Calculate IPW so that each state's observations count equally
-## and re-estimate Table 2. 
+## and re-estimate Table 2.
 
 ## Calculate IPW
-weights<-can_fe%>%filter(CensusLines==1)%>%
+weights<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
   group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
+
+#AV: I think your weights need to be a function of the data usable. I tried this out with HasDistanceCFDyn==1. Are there other criteria we need to use too? And if this is right, prob need to duplicate with the nonDyn scores as well
 
 ## Join weights to can_fe and subset to relevant data
 ## Have to create dyn and ndyn subsets because lfe
@@ -1414,7 +1445,7 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
                            c("Party Fixed Effects", "", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark"),
                            c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
-          
+
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
@@ -1428,15 +1459,15 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## level and also contains counts for clean candidates at the district level.
 
 valence<-election_allres%>%
-  
+
   ## Drop Arizona house districts which are multi-member, hard to map
   ## candidate public financing status onto voteshare in two candidate context and
   ## have results be comparable to single member districts
-  
+
   filter(!(sab=="AZ" & sen==0))%>%
   ## If district-year observation doesn't have any Clean candidates, will have a
   ## NA from count_district, so we need to convert NAs to zero.
-  
+
   mutate(CleanRepub=ifelse(is.na(CleanRepub)==TRUE, 0, CleanRepub),
          CleanDem=ifelse(is.na(CleanDem)==TRUE, 0, CleanDem),
          CleanOth=ifelse(is.na(CleanOth)==TRUE,0,CleanOth),
@@ -1451,7 +1482,7 @@ valence<-election_allres%>%
          ## Create indicator for whether observation is in 2000 and 2010 Census district lines, and then indicator
          ## for both (CensusLines)
          Census_Group=ifelse(CENSUS2010==1, "Census2010", NA),
-         Census_Group=ifelse(CENSUS2000==1, "Census2000",Census_Group), 
+         Census_Group=ifelse(CENSUS2000==1, "Census2000",Census_Group),
          CensusLines=ifelse(is.na(Census_Group)==TRUE,0,1),
          ## Create State-District-Chamber-Redistricting cycle factor level
          UniqueDistrictChamber=ifelse(sen==1, paste0("Senate", dno), paste0("House", dno)),##Create House and Senate District specific indicator variables
@@ -1482,10 +1513,10 @@ valence<-election_allres%>%
 
 ## Valence Analysis: Regress Republican Voteshare on Indicators for party contestation
 ## and incumbency. Include district and year x state fixed effects. Cluster standard errors
-## by redistricting cycle specific standard errors. 
+## by redistricting cycle specific standard errors.
 valence_mod_rep<-felm(RepVS~CleanFactor+dinc+rinc+oinc+ocand+dcand+rcand|
                         year:sab+UniqueDistrict_CensusGroup|0|UniqueDistrict_CensusGroup, data=valence,
-                      subset=CensusLines==1 )
+                      subset=CensusLines==1)
 summary(valence_mod_rep)
 
 ## Valence Analysis: Regress Republican Voteshare on Indicators, add district x
@@ -1526,7 +1557,7 @@ stargazer(valence_mod_rep,valence_mod_rep_tt,
 
 
 
-####FIGURE 1 & FIGURE 2 CODE#### 
+####FIGURE 1 & FIGURE 2 CODE####
 
 ## Read in contest level election results.
 election<-readRDS("102slersuoacontest20181024-1.RDS")
@@ -1544,13 +1575,15 @@ election_all<-election %>%
          ocand=ifelse(sab=="AZ"& sen==0, ocand*2, ocand),
          dcand=ifelse(sab=="AZ"& sen==0, dcand*2, dcand),
   ## Use eseats variable to calculate number of incumbents in all districts
-  ## because of multi-membr problem noted above
+  ## because of multi-member problem noted above
          IncumbentInRace=rinc*eseats+dinc*eseats+oinc*eseats,
   ## Calculate total candidates and number of challengers within district-year observations
          TotalCan=rcand+ocand+dcand, Challengers=TotalCan-IncumbentInRace)
 
   ## Select incumbent challenger count variables
 inc_count<-election_all%>%select(sab, year, sen, dno, IncumbentInRace, TotalCan, Challengers)
+
+#AV: Do you need this inc_count thing?
 
 ## Summarize candidate counts by party
 election_all<-election_all%>%group_by(sab, year, sen, dno)%>%
@@ -1567,7 +1600,7 @@ ftm<-read.csv("PublicFundingFTM.csv", stringsAsFactors = FALSE)
 
 
 count_district<-ftm %>%
-  mutate(House=ifelse(str_detect(Office, "HOUSE"), 1, 0), 
+  mutate(House=ifelse(str_detect(Office, "HOUSE"), 1, 0),
          Senate=ifelse(str_detect(Office, "SENATE"),1,0))%>%
   filter( ( (State=="ME") | (State=="CT") | (State=="AZ") ) & ( House==1 | Senate==1)
           & Year <=2016 &  Year %!in% c(2011, 2013, 2015) &
@@ -1648,8 +1681,3 @@ ggplot(IC_plot, aes(x=Year, y=Pct/100, group=Category)) +
         axis.text.x = element_text(angle = 90, hjust = 1),legend.position = c(.75, .25),
         legend.title=element_blank(),
         text=element_text(size=24))+facet_wrap(~State, nrow=2)
-
-
-
-
-
