@@ -434,7 +434,7 @@ can_fe<-can_fe%>%mutate(
   Incumbent=ifelse(Incum.Chall=="I",1,0),## Create indicator for whether candidate was incumbent
   RepubIndicator=ifelse(party==200, 1, 0), ## Create indicator for whether candidate is Republican
   ## Create competitive interaction term factor
-  CompetitiveElection=ifelse(WinnerT2VoteShare<.6,1,0),
+  CompetitiveElection=ifelse(WinnerT2VoteShare<=.55,1,0),
   CompetitiveInteraction=as.factor(paste0("Competitive",CompetitiveElection, "CleanYear",CleanYear)),
   ME_2000CENSUS=ifelse(sab=="ME" & year >=2004 & year <=2012, 1, 0),##Create indicator for ME 2000 Census districts
   CT_2000CENSUS=ifelse(sab=="CT" & year>=2008 & year <=2010,1,0),##Create indicator for CT 2000 Census Districits
@@ -700,6 +700,7 @@ stargazer(all_np,all_np_party,all_np_hasDistCF,
 ## recipient.cfscore.
 
 
+
 ## Pooled States: Dynamic Distance Estimate with District and Year Fixed
 ## Effects, SEs clustered by district
 all_dyn<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
@@ -793,12 +794,12 @@ ind_cf_incumb<-felm(Distance_CFDyn~CleanYear+Incumbent|bonica.rid+year+UniqueDis
 summary(ind_cf_incumb)
 
 ## Subset by party: Democrats, candidate fixed effects, incumbency indicator, SEs clustered by candidate
-ind_cf_dem<-felm(Distance_CFDyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
+ind_cf_dem<-felm(recipient.cfscore.dyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                  data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1 &party==100 & HasDistanceCFDyn==1)
 summary(ind_cf_dem)
 
 ## Subset by party: Republican, candidate fixed effects, incumbency indicator, SEs clustered by candidate
-ind_cf_rep<-felm(Distance_CFDyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
+ind_cf_rep<-felm(recipient.cfscore.dyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                  data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1& party==200 & HasDistanceCFDyn==1)
 summary(ind_cf_rep)
 
@@ -808,6 +809,7 @@ summary(ind_cf_rep)
 #MK We subsetted to party here in Table 3
 ## because reviewer 3 asked us to in the last comment in
 #the feedback.
+## MK Replace table with code
 
 
 ## Format latex table
@@ -907,7 +909,7 @@ DynR<-t.test(pairedRepsGC$Crecipient.cfscore.dyn, pairedRepsGC$UCrecipient.cfsco
 
 ## Create lm models to incorporate T-Test results into stargazer
 ## Can't figure out a simpler way to format these results nicely, any ideas?
-#AV: Nothing comes to mind here, seems like your way works haha
+
 modD<-modDDyn<-modR<-modRDyn<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store dynamic modD/RDyn and stable CFScore (modD/R) paired t-test results
@@ -935,17 +937,11 @@ stargazer(modD, modDDyn, modR, modRDyn,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
           add.lines = list(c("N",nonDynD$parameter+1,DynD$parameter+1,nonDynR$parameter+1,DynR$parameter+1)))
 
-#AV: I think I fixed this to automatically put the correct sample sizes in,
-#let me know if this looks like what you had in mind
-
 ####Table 5 Paired T-Test Winner Ideology####
 
 ## Use pairedDems/pairedRepsW because Table 5 includes only winners
 ## legislator same-party, same year, same district pairs
 ## Calculate difference in ideology using dynamic and stable estimates by party
-
-#AV: added _W after to distinguish winners from above (don't think we should overwrite what we did above)
-#AV: as i go through, i realized this happens a decent amt. not sure if this is worth fixing or not
 
 ## Non-dynamic estimates
 nonDynD_W<-t.test(pairedDemsW$Crecipient.cfscore, pairedDemsW$UCrecipient.cfscore, paired=TRUE)
@@ -1063,11 +1059,9 @@ stargazer(Missing,
 
 ## Interact candidate incumbency status with clean election status
 incumb_cf<-felm(Distance_CFDyn~CleanYear*Incumbent|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
-                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1 & RedistTime > 2) 
+                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1) 
 summary(incumb_cf)
 
-#AV: I wrote this in the side code, but you probably want to exclude people who just got redistricted as "Incumbents".
-#    Results still hold. What do you think? Either way, we should note in a footnote that it's not affected by our specification. 
 
 ## Incumbency marginal effects plot
 incumb_cf_MarginalEffect<-plot_model(incumb_cf)$data%>%
@@ -1112,7 +1106,6 @@ ggplot(party_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
         text=element_text(size=16, face="bold"))
 
 ## Competitive Election (+|-10% vote share) Interaction Analysis
-#AV: you mean 20%, right? your specification says if they got less than 60%. so in 2 way vote share, that's <20%. 
 compet_cf<-felm(Distance_CFDyn~CompetitiveInteraction|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
                 data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
 summary(compet_cf)
@@ -1178,8 +1171,6 @@ pooledSE <- sqrt((((nObs[1] - 1) * az_cf$cse[1] ^ 2) + ((nObs[2] - 1) * ct_cf$cs
                   + ((nObs[3] - 1) * me_cf$cse[1] ^ 2))
                  /
                    (sum(nObs) - 3))
-
-#AV: We should note that the sample standard deviations are fairly similar to justify our use of a pooled statistic vs an unpooled one. Although tbh it wouldn't make a huge difference. 
 
 ## Averaged coef T-stat
 tstat = AvgCoef/pooledSE
@@ -1274,9 +1265,6 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## Repeat Table 2 analysis substituting DW-DIME distance estimate for dynamic cf
 ## estimate Subset data to observations which have both a DW-DIME estimate and
 ## DistanceCFDyn estimate
-
-
-#AV: I don't think this makes a difference, but why do you need to also subset on HasDistanceCFDyn for the first analysis here?
 
 ##Pooled States: DW-DIME Distance Estimate
 all_dwdime<-felm(Distance_DWDIME~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
@@ -1375,23 +1363,24 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## Calculate IPW so that each state's observations count equally
 ## and re-estimate Table 2.
 
-## Calculate IPW
-weights<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
+## Calculate IPW for dynamic and stable CFScore estimate subsets
+weights_CFDyn<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
   group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
 
-#AV: I think your weights need to be a function of the data usable. I tried this out with HasDistanceCFDyn==1. Are there other criteria we need to use too? And if this is right, prob need to duplicate with the nonDyn scores as well
+weights_CFnonDyn<-can_fe%>%filter(CensusLines==1& HasDistanceCFnonDyn==1)%>%
+  group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
 
 ## Join weights to can_fe and subset to relevant data
 ## Have to create dyn and ndyn subsets because lfe
 ## throws error when trying to use subset and weights in same felm call
 
-can_fe_weights_dyn<-left_join(can_fe, weights, by=c("sab"))%>%
+can_fe_weights_dyn<-left_join(can_fe, weights_CFDyn, by=c("sab"))%>%
   filter(CensusLines==1 &HasDistanceCFDyn==1)
-can_fe_weights_ndyn<-left_join(can_fe, weights, by=c("sab"))%>%
+can_fe_weights_ndyn<-left_join(can_fe, weights_CFnonDyn, by=c("sab"))%>%
   filter(CensusLines==1 & HasDistanceCFnonDyn==1)
 
 ## Save weights
-weightsPrint<-weights%>%pull()
+weightsPrint<-can_fe_weights_dyn%>%pull()
 weightsLabel<-paste("AZ:", round(weightsPrint[1],2), "CT:", round(weightsPrint[2],2), "ME:",
                     round(weightsPrint[3],2))
 
@@ -1580,10 +1569,7 @@ election_all<-election %>%
   ## Calculate total candidates and number of challengers within district-year observations
          TotalCan=rcand+ocand+dcand, Challengers=TotalCan-IncumbentInRace)
 
-  ## Select incumbent challenger count variables
-inc_count<-election_all%>%select(sab, year, sen, dno, IncumbentInRace, TotalCan, Challengers)
 
-#AV: Do you need this inc_count thing?
 
 ## Summarize candidate counts by party
 election_all<-election_all%>%group_by(sab, year, sen, dno)%>%

@@ -31,13 +31,15 @@ can_fe %>% filter(bonica.rid == "cand6661" & year == 2010)
 table(can_fe$sen,can_fe$seat)
 table(can_fe$party,can_fe$RepubIndicator)
 
-#calc of switchers: what's the reason for the discrepancy? not saying you're wrong, just curious for your operationalization
+#calc of switchers: what's the reason for the discrepancy? 
+# not saying you're wrong, just curious for your operationalization
+#MK figure this out 
 table(can_fe$PFStatusSwitcher) #1320 by your def
 table(can_fe$CleanYear==can_fe$CleanFirstRun) #816 by this def: anyone whose CleanFirstRun!= CleanYear
-nrow(left_join(can_fe %>% filter(CleanYear != CleanFirstRun) %>% distinct(bonica.rid),
-              can_fe)) #1597 by this one: anyone who ever switched
+nrow(can_fe %>% filter(CleanYear != CleanFirstRun & CensusLines==1) %>% distinct(bonica.rid)) #1597 by this one: anyone who ever switched
 
-#just comparing this to A4... interesting that AZ & ME are pretty close to the simple avg, while CT changes by ~10 pts
+#just comparing this to A4... interesting that AZ & ME are pretty close to the
+#simple avg, while CT changes by ~10 pts
 can_fe %>% group_by(sab,CleanYear) %>% summarize(dist = mean(Distance_CFDyn,na.rm=T))
 
 ##plots:
