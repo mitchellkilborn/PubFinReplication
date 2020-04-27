@@ -11,7 +11,6 @@ duplicate_candidates = left_join(can_fe %>%
 missing_winners_AZH = left_join(can_fe %>% group_by(year,sab,sen,dno) %>% summarize(wins = sum(WonElection)) %>%
                                    filter(sab == "AZ" & sen == 0 & wins != 2),
                                  can_fe)
-
 #districts outside AZ house without one winner
 missing_winners_other = left_join(can_fe %>% group_by(year,sab,sen,dno) %>% summarize(wins = sum(WonElection)) %>%
                                     filter((sab != "AZ" | sen != 0) & wins != 1),
@@ -23,6 +22,7 @@ table(can_fe$year,can_fe$Incumbent)
 #districts with >1 incumbent. are these all bc of redistricting? the 2014 AZ sen ones shouldn't be
 missing_incs = can_fe %>% group_by(year,sab,sen,dno) %>% summarize(Inc = sum(Incumbent)) %>%
   filter(((sab != "AZ" | sen != 0) & Inc > 1) | (sab == "AZ" & sen == 0 & Inc > 2))
+
 
 #this observation seems weird, look at the cf score. i doubt it changes anything. 
 can_fe %>% filter(bonica.rid == "cand6661" & year == 2010)
