@@ -8,18 +8,26 @@ duplicate_candidates = left_join(can_fe %>%
                               can_fe)
 
 #districts in AZ house without two winners
+# Mark Cardenas AZ House 19 Winner 2016 is missing from dime dataset
 missing_winners_AZH = left_join(can_fe %>% group_by(year,sab,sen,dno) %>% summarize(wins = sum(WonElection)) %>%
                                    filter(sab == "AZ" & sen == 0 & wins != 2),
                                  can_fe)
+
 #districts outside AZ house without one winner
-missing_winners_other = left_join(can_fe %>% group_by(year,sab,sen,dno) %>% summarize(wins = sum(WonElection)) %>%
+# Missing Zachary E. Matthews ME 102 Winner from dime
+# Missing Peter D. Chase  ME 2000 122 winner from dime
+# Missing Maitland Richardson ME 2006 Senate 26 winner from dime 
+missing_winners_other = left_join(can_fe %>% group_by(year,sab,sen,dno) %>% 
+                                    summarize(wins = sum(WonElection)) %>%
                                     filter((sab != "AZ" | sen != 0) & wins != 1),
                                   can_fe)
 
 #incumbents by year. when we do the incumbent anaylsis, i might exclude redistricting yrs bc they aren't true incumbents
 table(can_fe$year,can_fe$Incumbent)
 
-#districts with >1 incumbent. are these all bc of redistricting? the 2014 AZ sen ones shouldn't be
+#districts with >1 incumbent. are these all bc of redistricting? 
+# Arizona House District 28 2012 has three incumbents competing
+# against each other, good stuff
 missing_incs = can_fe %>% group_by(year,sab,sen,dno) %>% summarize(Inc = sum(Incumbent)) %>%
   filter(((sab != "AZ" | sen != 0) & Inc > 1) | (sab == "AZ" & sen == 0 & Inc > 2))
 
@@ -33,10 +41,18 @@ table(can_fe$party,can_fe$RepubIndicator)
 
 #calc of switchers: what's the reason for the discrepancy? 
 # not saying you're wrong, just curious for your operationalization
-#MK figure this out 
-table(can_fe$PFStatusSwitcher) #1320 by your def
-table(can_fe$CleanYear==can_fe$CleanFirstRun) #816 by this def: anyone whose CleanFirstRun!= CleanYear
-nrow(can_fe %>% filter(CleanYear != CleanFirstRun & CensusLines==1) %>% distinct(bonica.rid)) #1597 by this one: anyone who ever switched
+# Discrepancy is caused by CensusLines not including 2000,2002 for ME and AZ
+# So my method counted some people who switched within 2004-2016, while yours 
+# gets 2000-2016. Both numbers are relevant, one describes the number of switchers
+# in the data used in the analysis, one describes the total number throughout
+## all our data.
+look<-can_fe %>% filter(CleanYear != CleanFirstRun & CensusLines==1) %>% 
+      select(bonica.rid, CleanYear,CleanFirstRun)%>%
+       distinct(bonica.rid, .keep_all = TRUE)%>%select(bonica.rid, CleanYear,CleanFirstRun)%>%
+       arrange(bonica.rid)
+
+
+
 
 #just comparing this to A4... interesting that AZ & ME are pretty close to the
 #simple avg, while CT changes by ~10 pts
