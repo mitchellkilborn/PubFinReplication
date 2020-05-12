@@ -533,7 +533,7 @@ can_fe<-can_fe%>%
          PFStatusSwitcher,Incumbent, seat,
          recipient.cfscore,NP_Score,Distance_NP,
          recipient.cfscore.dyn,ran.general,
-         HasDynamicCF,RepubIndicator,CompetitiveInteraction,
+         HasDynamicCF,RepubIndicator,CompetitiveInteraction,CompetitiveElection,
          tenure1, Distance_DWDIME, HasDistanceDWDIME)
 
 #### Load can_fe from here####
@@ -1238,6 +1238,7 @@ compet_cf_MarginalEffect<-plot_model(compet_cf)$data%>%
                      "CompetitiveInteractionCompetitive1CleanYear1"="Publicly Funded Candidate Marginal District"),
          term=str_wrap(term, width=10))
 
+
 ggplot(compet_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
   geom_point(size=3)+ylim(-.5, .5)+
   geom_errorbar(aes(ymin=conf.low,ymax=conf.high,
@@ -1247,6 +1248,21 @@ ggplot(compet_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
                 Horizontal lines are 95% confidence intervals")+coord_flip()+
   theme(axis.text =element_text(size=16, face="bold"),axis.title=element_text(size=16,face="bold"),
         text=element_text(size=16, face="bold"))
+
+## Calculate what pct of districts in data exhibit intra-redistricting cycle change
+changeDistricts<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
+                       select(UniqueDistrict_CensusGroup,CompetitiveElection)%>%
+                       distinct()%>%
+                       group_by(UniqueDistrict_CensusGroup,CompetitiveElection)%>%
+                       count()%>%
+                       group_by(UniqueDistrict_CensusGroup)%>%count()%>%filter(n>1)
+                       
+totalDistricts<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
+  select(UniqueDistrict_CensusGroup)%>%
+  distinct()%>%group_by(UniqueDistrict_CensusGroup)%>%count()
+
+paste(round(nrow(changeDistricts)/nrow(totalDistricts)*100), 
+"% of redistricting specific cycle districts see a change in competitiveness in our sample", sep="")
 
 ####SI-A5 State By State Analysis####
 

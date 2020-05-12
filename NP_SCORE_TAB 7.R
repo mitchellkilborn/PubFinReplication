@@ -42,8 +42,8 @@ packinfo[which(packinfo$Package %in% list.of.packages),c("Package", "Version")]
 sessionInfo()
 # R version 3.6.2 (2019-12-12)
 # Platform: x86_64-apple-darwin15.6.0 (64-bit)
-# Running under: macOS Catalina 10.15.3
-# April 7, 2020
+# Running under: macOS Catalina 10.15.4
+# May 12, 2020
 
 
 #############################Functions#######################################
@@ -342,7 +342,7 @@ modDistTest<-lm(RanClean~Senate, data=dems)
 modDistTest$coefficients[1]<-npDistTest$estimate[[1]]
 
 
-## Stargazer for NP Scores
+## Stargazer for NPAT Scores
 ## Also must move 1st row third column to second row third column,
 ## can't get stargazer to move standard error and coefficient, but 
 ## DV is different in third column from first two.
@@ -358,9 +358,9 @@ stargazer(modDTest, modRTest, modDistTest,
           style = 'apsr',
           order=c("Constant"),
           table.placement = "H",
-          title=c("Paired T-Test Estimates: Arizona State Legislators' Polarization and Ideological Distance NP Score, 2000-2014"),
+          title=c("Paired T-Test Estimates: Arizona State Legislators' Polarization and Ideological Distance NPAT Score, 2000-2014"),
           label=c("NPDistance TTest"),
-          covariate.labels =c("NP Score Diff.", "Ideological Distance"),
+          covariate.labels =c("NPAT Score Diff.", "Ideological Distance"),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser", "n"),
           add.lines = list(c("N", dtest$parameter+1, rtest$parameter+1, npDistTest$parameter+1)))
