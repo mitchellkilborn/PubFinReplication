@@ -543,7 +543,9 @@ can_fe<-readRDS("can_fe.RDS")
 
 
 
-####NP Score Distance Analysis####
+
+
+####Calculate Public/Private Financing Changeovers####
 ## The look object below calculates how many unique
 ## legislators and unique never succesful legislative candidates
 ## exist within each district for the Census 2000 and Census2010 data
@@ -610,7 +612,9 @@ Changes<-can_fe%>%
   count(sab,Contrast)%>%
   mutate(Prop=prop.table(n))
 
-
+## Calculate total for ME and CE
+ChangesCTME<-Changes%>%filter(sab!="AZ")%>%group_by(Contrast)%>%
+  summarize(Total=sum(n))%>%mutate(Prop=prop.table(Total))%>%pull(Prop)
 
 
 ####Table 2 Core Results####
@@ -711,6 +715,11 @@ ind_cf<-felm(Distance_CFDyn~CleanYear|bonica.rid+year+UniqueDistrict_CensusGroup
              data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1 & HasDistanceCFDyn==1)
 summary(ind_cf)
 
+# can_fe<-can_fe%>%mutate(CYIncInteraction=paste0(CleanYear,Incumbent),
+#                         CYIncInteraction=fct_relevel(CYIncInteraction,"10",
+#                                                      "00",
+#                                                      "11",
+#                                                      "01"))
 ## Add candidate incumbency variable, SEs clustered by candidate
 ind_cf_incumb<-felm(Distance_CFDyn~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                     data=can_fe, subset=CensusLines==1& PFStatusSwitcher==1 & HasDistanceCFDyn==1)
@@ -1152,6 +1161,12 @@ ggplot(party_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
         text=element_text(size=16, face="bold"))
 
 ## Competitive Election (+|-10% vote share) Interaction Analysis
+# Relevel factor to examine different base cases
+# can_fe<-can_fe%>%mutate(CompetitiveInteraction=fct_relevel(CompetitiveInteraction,
+#                                        c("Competitive1CleanYear0",
+#                                          "Competitive0CleanYear0",
+#                                          "Competitive1CleanYear1",
+#                                          "Competitive0CleanYear1")))
 compet_cf<-felm(Distance_CFDyn~CompetitiveInteraction|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
                 data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
 summary(compet_cf)
