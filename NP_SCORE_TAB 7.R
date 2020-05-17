@@ -370,6 +370,6 @@ stargazer(modDTest, modRTest, modDistTest,
 ## Count how many times the clean elections legislator is more ideologically distant
 ## than the non-clean legislator and perform binomial exact tests
 binom.test(sum(mrp_paired_test$CLMoreExtreme, na.rm = TRUE),
-           sum(!is.na(mrp_paired_test$CLMoreExtreme)),(1/2),alternative="greater")
+           sum(!is.na(mrp_paired_test$CLMoreExtreme)),(1/2))
 
 

@@ -371,19 +371,12 @@ can_fe<-left_join(election_allres, bonica_ftm,
 npscores<-readRDS("NP_ScoresMatchedToBonicaRIDS2000_2014_AZMECT.RDS")%>%
   mutate(cycle=as.numeric(cycle))%>%distinct(bonica.rid,cycle,.keep_all = TRUE)
 can_fe<-left_join(can_fe, npscores, by=c("bonica.rid"="bonica.rid","year"="cycle"))
-
-
 ## Calculate coefficients for Rogers (2017) district ideal point imputation
 
 ## Regress dynamic CF Score on district ideology
 
 ideal_points_CF<-lm(recipient.cfscore.dyn~MRP_Mean, data=can_fe)
 summary(ideal_points_CF)
-
-## Regress dynamic NP_Score on district ideology using only winning candidates/legislators
-
-ideal_points_NP<-lm(NP_Score~MRP_Mean, data=can_fe, subset = can_fe$winner=="W")
-summary(ideal_points_NP)
 
 ## Regress DWDIME on district ideology
 
@@ -411,10 +404,6 @@ can_fe<-can_fe%>%mutate(
   Distance_CFDyn=abs(recipient.cfscore.dyn-EstimatedIdealPointCF),
   Distance_CFnonDyn=abs(recipient.cfscore-EstimatedIdealPointCF),
   CFScoreDynAbs=abs(recipient.cfscore.dyn),## Calculate absolute value of dynamicCFScore
-  ## Calculate ideological distance for NPScores
-  Intercept=ideal_points_NP$coefficients[1], phi1=ideal_points_NP$coefficients[2],
-  EstimatedIdealPointNP=Intercept+phi1*MRP_Mean,
-  Distance_NP=abs(NP_Score-EstimatedIdealPointNP),
   ## Calculate ideological distance for DWDIME Scores
   Intercept=ideal_points_DWDIME$coefficients[1], phi1=ideal_points_DWDIME$coefficients[2],
   EstimatedIdealPointDWDIME=Intercept+phi1*MRP_Mean,
@@ -531,7 +520,7 @@ can_fe<-can_fe%>%
          CensusLines,CleanYear, RedistTime,WonElection,
          CleanFirstRun,HasDistanceCFDyn, HasDistanceCFnonDyn,
          PFStatusSwitcher,Incumbent, seat,
-         recipient.cfscore,NP_Score,Distance_NP,
+         recipient.cfscore,NP_Score,
          recipient.cfscore.dyn,ran.general,
          HasDynamicCF,RepubIndicator,CompetitiveInteraction,CompetitiveElection,
          tenure1, Distance_DWDIME, HasDistanceDWDIME)
@@ -772,7 +761,7 @@ stargazer(ind_cf,ind_cf_incumb,ind_cf_dem,ind_cf_rep,
 
 ## Subset to Arizona data only and select relevant variables
 aztest<-can_fe%>%filter(sab=="AZ")%>%
-  select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,NP_Score,Distance_NP,
+  select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,NP_Score,
          recipient.cfscore.dyn,ran.general,CleanYear,CleanFirstRun,
          Distance_CFDyn,Distance_CFnonDyn, WonElection)%>%
   ## Convert year to numeric from factor to facilitate merging
@@ -956,12 +945,12 @@ stargazer(modDyn, modNonDyn,
 ## Dynamic CFScore Estimates: For how many cases does the 
 ## publicly funded candidate have a larger CFScore distance
 sum(pairedGC$CLMoreExtremeDyn, na.rm = TRUE)/sum(!is.na(pairedGC$CLMoreExtremeDyn))
-binom.test(sum(pairedGC$CLMoreExtremeDyn, na.rm = TRUE),sum(!is.na(pairedGC$CLMoreExtremeDyn)), .5, alternative = "greater")
+binom.test(sum(pairedGC$CLMoreExtremeDyn, na.rm = TRUE),sum(!is.na(pairedGC$CLMoreExtremeDyn)), .5)
 
 ## Static CFScore Estimates: For how many cases does the 
 ## publicly funded candidate have a larger CFScore distance
 sum(pairedGC$CLMoreExtremeNonDyn, na.rm = TRUE)/sum(!is.na(pairedGC$CLMoreExtremeNonDyn))
-binom.test(sum(pairedGC$CLMoreExtremeNonDyn, na.rm = TRUE), sum(!is.na(pairedGC$CLMoreExtremeNonDyn)), .5, alternative="greater")
+binom.test(sum(pairedGC$CLMoreExtremeNonDyn, na.rm = TRUE), sum(!is.na(pairedGC$CLMoreExtremeNonDyn)), .5)
 
 
 ####Table 7 NP-Score Analysis####
