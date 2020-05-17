@@ -1274,6 +1274,88 @@ stargazer(all_cf,az_cf, ct_cf, me_cf,
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
+
+####SI-A5 IPW Analysis####
+
+## Calculate IPW so that each state's observations count equally
+## and re-estimate Table 2.
+
+## Calculate IPW for dynamic and stable CFScore estimate subsets
+weights_CFDyn<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
+  group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
+
+weights_CFnonDyn<-can_fe%>%filter(CensusLines==1& HasDistanceCFnonDyn==1)%>%
+  group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
+
+## Join weights to can_fe and subset to relevant data
+## Have to create dyn and ndyn subsets because lfe
+## throws error when trying to use subset and weights in same felm call
+
+can_fe_weights_dyn<-left_join(can_fe, weights_CFDyn, by=c("sab"))%>%
+  filter(CensusLines==1 &HasDistanceCFDyn==1)
+can_fe_weights_ndyn<-left_join(can_fe, weights_CFnonDyn, by=c("sab"))%>%
+  filter(CensusLines==1 & HasDistanceCFnonDyn==1)
+
+## Save weights
+weightsPrint<-weights_CFDyn%>%pull()
+weightsLabel<-paste("AZ:", round(weightsPrint[1],2), "CT:", round(weightsPrint[2],2), "ME:",
+                    round(weightsPrint[3],2))
+
+## Pooled States: Dynamic Distance Estimate
+all_dyn<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
+              data=can_fe_weights_dyn, weights=can_fe_weights_dyn$IPW)
+summary(all_dyn)
+
+## Pooled States: Dynamic Distance Estimate Party Fixed Effects
+all_dyn_party<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup+year+party|0|UniqueDistrict_CensusGroup,
+                    data=can_fe_weights_dyn, weights=can_fe_weights_dyn$IPW)
+summary(all_dyn_party)
+
+## Pooled States: Dynamic Distance Estimate Party Fixed Effects Time Trend
+all_dyn_party_trend<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup:RedistTime+party|0|UniqueDistrict_CensusGroup,
+                          data=can_fe_weights_dyn, weights=can_fe_weights_dyn$IPW)
+summary(all_dyn_party_trend)
+
+
+## Pooled States: Non-Dynamic Distance Estimate
+all_ndyn<-felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
+               data=can_fe_weights_ndyn, weights=can_fe_weights_ndyn$IPW)
+summary(all_ndyn)
+
+## Pooled States: Non-Dynamic Distance Estimate Party Fixed Effects
+all_ndyn_party<-felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_CensusGroup+year+party|0|UniqueDistrict_CensusGroup,
+                     data=can_fe_weights_ndyn, weights=can_fe_weights_ndyn$IPW)
+summary(all_ndyn_party)
+
+## Pooled States: Non-Dynamic Distance Estimate Party Fixed Effects Time Trend
+all_ndyn_party_trend<-felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_CensusGroup:RedistTime+party|0|UniqueDistrict_CensusGroup,
+                           data=can_fe_weights_ndyn, weights=can_fe_weights_ndyn$IPW)
+summary(all_ndyn_party_trend)
+
+## Create latex table
+stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_ndyn_party_trend,
+          model.names = FALSE, model.numbers = TRUE,
+          dep.var.labels.include = FALSE,
+          column.labels   = c("Dynamic CFScore Distance", "Stable CFScore Distance"),
+          column.separate = c(3,3),
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          omit=c("party"),
+          style = 'apsr',
+          table.placement = "H",
+          title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects, Weighted by State"),
+          label=c("tab:WeightedResults"),
+          notes = c("Notes: Standard errors clustered", " by district in parentheses.",
+                    weightsLabel),
+          covariate.labels =c("Public Financing Candidate"),
+          add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
+                           c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
+                           c("Party Fixed Effects", "", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark"),
+                           c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
+          
+          multicolumn = FALSE,
+          omit.stat = c("rsq","adj.rsq","f","ser"))
+
+
 ####SI-A6 Legislator Tenure analysis####
 
 ## Add tenure variable to Table 2 models
@@ -1381,88 +1463,8 @@ sd(can_fe$Distance_CFDyn, na.rm=TRUE)
 
 
 
-####SI-A8 Weighting Analysis####
 
-## Calculate IPW so that each state's observations count equally
-## and re-estimate Table 2.
-
-## Calculate IPW for dynamic and stable CFScore estimate subsets
-weights_CFDyn<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
-  group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
-
-weights_CFnonDyn<-can_fe%>%filter(CensusLines==1& HasDistanceCFnonDyn==1)%>%
-  group_by(sab)%>%summarize(IPW=1/(n()/nrow(.)))
-
-## Join weights to can_fe and subset to relevant data
-## Have to create dyn and ndyn subsets because lfe
-## throws error when trying to use subset and weights in same felm call
-
-can_fe_weights_dyn<-left_join(can_fe, weights_CFDyn, by=c("sab"))%>%
-  filter(CensusLines==1 &HasDistanceCFDyn==1)
-can_fe_weights_ndyn<-left_join(can_fe, weights_CFnonDyn, by=c("sab"))%>%
-  filter(CensusLines==1 & HasDistanceCFnonDyn==1)
-
-## Save weights
-weightsPrint<-weights_CFDyn%>%pull()
-weightsLabel<-paste("AZ:", round(weightsPrint[1],2), "CT:", round(weightsPrint[2],2), "ME:",
-                    round(weightsPrint[3],2))
-
-## Pooled States: Dynamic Distance Estimate
-all_dyn<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
-              data=can_fe_weights_dyn, weights=can_fe_weights_dyn$IPW)
-summary(all_dyn)
-
-## Pooled States: Dynamic Distance Estimate Party Fixed Effects
-all_dyn_party<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup+year+party|0|UniqueDistrict_CensusGroup,
-                    data=can_fe_weights_dyn, weights=can_fe_weights_dyn$IPW)
-summary(all_dyn_party)
-
-## Pooled States: Dynamic Distance Estimate Party Fixed Effects Time Trend
-all_dyn_party_trend<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup:RedistTime+party|0|UniqueDistrict_CensusGroup,
-                          data=can_fe_weights_dyn, weights=can_fe_weights_dyn$IPW)
-summary(all_dyn_party_trend)
-
-
-## Pooled States: Non-Dynamic Distance Estimate
-all_ndyn<-felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
-               data=can_fe_weights_ndyn, weights=can_fe_weights_ndyn$IPW)
-summary(all_ndyn)
-
-## Pooled States: Non-Dynamic Distance Estimate Party Fixed Effects
-all_ndyn_party<-felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_CensusGroup+year+party|0|UniqueDistrict_CensusGroup,
-                     data=can_fe_weights_ndyn, weights=can_fe_weights_ndyn$IPW)
-summary(all_ndyn_party)
-
-## Pooled States: Non-Dynamic Distance Estimate Party Fixed Effects Time Trend
-all_ndyn_party_trend<-felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_CensusGroup:RedistTime+party|0|UniqueDistrict_CensusGroup,
-                           data=can_fe_weights_ndyn, weights=can_fe_weights_ndyn$IPW)
-summary(all_ndyn_party_trend)
-
-## Create latex table
-stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_ndyn_party_trend,
-          model.names = FALSE, model.numbers = TRUE,
-          dep.var.labels.include = FALSE,
-          column.labels   = c("Dynamic CFScore Distance", "Stable CFScore Distance"),
-          column.separate = c(3,3),
-          star.cutoffs = c(0.05, 0.01, 0.001),
-          omit=c("party"),
-          style = 'apsr',
-          table.placement = "H",
-          title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects, Weighted by State"),
-          label=c("tab:WeightedResults"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses.",
-                    weightsLabel),
-          covariate.labels =c("Public Financing Candidate"),
-          add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
-                           c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
-                           c("Party Fixed Effects", "", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark"),
-                           c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
-          
-          multicolumn = FALSE,
-          omit.stat = c("rsq","adj.rsq","f","ser"))
-
-
-####SI-A9 Clean From First Run Analysis####
+####SI-A8 Clean From First Run Analysis####
 
 ## Repeat Table 2 analysis using public financing status in first run as
 ## independent variable. All candidates elected prior to 2000 are coded as
