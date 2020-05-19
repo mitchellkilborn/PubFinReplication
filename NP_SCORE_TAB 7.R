@@ -366,7 +366,14 @@ stargazer(modDTest, modRTest, modDistTest,
           add.lines = list(c("N", dtest$parameter+1, rtest$parameter+1, npDistTest$parameter+1)))
 
 
-
+NPResultsTable<-tibble(Name=c("DemNPScore","RepNPScore","AllIdeoDist"),
+                       Estimate=c(dtest$estimate[[1]],
+                                  rtest$estimate[[1]],
+                                  npDistTest$estimate[[1]]),
+                       SE=c(dtest$stderr, rtest$stderr, npDistTest$stderr),
+                       P=c(dtest$p.value, rtest$p.value, npDistTest$p.value),
+                       N=c(dtest$parameter+1, rtest$parameter+1, npDistTest$parameter+1))
+#saveRDS(NPResultsTable, file="NPResultsTable.RDS")
 ## Count how many times the clean elections legislator is more ideologically distant
 ## than the non-clean legislator and perform binomial exact tests
 binom.test(sum(mrp_paired_test$CLMoreExtreme, na.rm = TRUE),

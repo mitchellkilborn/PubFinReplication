@@ -374,7 +374,6 @@ can_fe<-left_join(can_fe, npscores, by=c("bonica.rid"="bonica.rid","year"="cycle
 ## Calculate coefficients for Rogers (2017) district ideal point imputation
 
 ## Regress dynamic CF Score on district ideology
-
 ideal_points_CF<-lm(recipient.cfscore.dyn~MRP_Mean, data=can_fe)
 summary(ideal_points_CF)
 
@@ -759,6 +758,10 @@ stargazer(ind_cf,ind_cf_incumb,ind_cf_dem,ind_cf_rep,
 ## paired by district, party, and year. Need to format data to
 ## merge these observations while retaining distinct column names
 
+
+## Load NPResultsTable.RDS from NP_SCORE_TAB.R
+NPResultsTable<-readRDS("NPResultsTable.RDS")
+
 ## Subset to Arizona data only and select relevant variables
 aztest<-can_fe%>%filter(sab=="AZ")%>%
   select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,NP_Score,
@@ -879,21 +882,26 @@ DynR_W<-t.test(pairedRepsW$Crecipient.cfscore.dyn, pairedRepsW$UCrecipient.cfsco
 
 
 ## Create lm models to incorporate T-Test results into stargazer
-modD_W<-modDDyn_W<-modR_W<-modRDyn_W<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
+modD_W<-modDDyn_W<-modR_W<-modRDyn_W<-modD_NP<-modR_NP<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store Estimate
 modD_W$coefficients[1]<-nonDynD_W$estimate[[1]]
 modDDyn_W$coefficients[1]<-DynD_W$estimate[[1]]
+modD_NP$coefficients[1]<-NPResultsTable$Estimate[[1]]
 modR_W$coefficients[1]<-nonDynR_W$estimate[[1]]
 modRDyn_W$coefficients[1]<-DynR_W$estimate[[1]]
+modR_NP$coefficients[1]<-NPResultsTable$Estimate[[2]]
 
-stargazer(modD_W, modDDyn_W, modR_W, modRDyn_W,
-          se=list(nonDynD_W$stderr, DynD_W$stderr, nonDynR_W$stderr, DynR_W$stderr),
-          p=list(nonDynD_W$p.value, DynD_W$p.value, nonDynR_W$p.value, DynR_W$p.value),
+stargazer(modD_W, modDDyn_W,modD_NP, modR_W, modRDyn_W,modR_NP,
+          se=list(nonDynD_W$stderr, DynD_W$stderr,NPResultsTable$SE[[1]],
+                  nonDynR_W$stderr, DynR_W$stderr,NPResultsTable$SE[[2]]),
+          p=list(nonDynD_W$p.value, DynD_W$p.value,NPResultsTable$P[[1]],
+                 nonDynR_W$p.value, DynR_W$p.value,NPResultsTable$P[[1]]),
           model.names = FALSE, model.numbers = FALSE,
-          dep.var.labels = c("Stable CFScore", "Dynamic CFScore", "Stable CFScore", "Dynamic CFScore"),
+          dep.var.labels = c("Stable CFScore", "Dynamic CFScore", "SM Score",
+                             "Stable CFScore", "Dynamic CFScore", "SM Score"),
           column.labels   = c("Democratic Legislators", "Republican Legislators"),
-          column.separate = c(2,2),
+          column.separate = c(3,3),
           star.cutoffs = c(0.05, 0.01, 0.001),
           omit=c("Cyear"),
           style = 'apsr',
@@ -903,7 +911,9 @@ stargazer(modD_W, modDDyn_W, modR_W, modRDyn_W,
           covariate.labels =c("CFScore Difference"),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
-          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1, nonDynR_W$parameter+1, DynR_W$parameter+1)))
+          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1, 
+                             NPResultsTable$N[[1]],nonDynR_W$parameter+1, 
+                             DynR_W$parameter+1,NPResultsTable$N[[2]])))
 
 #### Table 6 Paired T-Test Ideological Distance GE Candidates####
 
@@ -912,23 +922,23 @@ Dyn<-t.test(pairedGC$CDistance_CFDyn, pairedGC$UCDistance_CFDyn, paired=TRUE)
 nonDyn<-t.test(pairedGC$CDistance_CFnonDyn, pairedGC$UCDistance_CFnonDyn, paired=TRUE)
 
 ## Create lm models to incorporate T-Test results into stargazer
-modNonDyn<-modDyn<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
+modNonDyn<-modDyn<-modNPDist<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store Estimate
 modNonDyn$coefficients[1]<-nonDyn$estimate[[1]]
 modDyn$coefficients[1]<-Dyn$estimate[[1]]
-
+modNPDist$coefficients[1]<-NPResultsTable$Estimate[[3]]
 ## Create line for observations
 ## Have to add back one due to degree of freedom calculation,
 ## not sure how to pull out total
 ## observations from T-test object
-stargazer(modDyn, modNonDyn,
-          se=list(Dyn$stderr,nonDyn$stderr),
-          p=list(Dyn$p.value, nonDyn$p.value),
+stargazer(modDyn, modNonDyn,modNPDist,
+          se=list(Dyn$stderr,nonDyn$stderr,NPResultsTable$SE[[3]]),
+          p=list(Dyn$p.value, nonDyn$p.value, NPResultsTable$P[[3]]),
           model.names = FALSE, model.numbers = FALSE,
           dep.var.labels.include = FALSE,
-          column.labels   = c("Dynamic CFScore", "Stable CFScore"),
-          column.separate = c(1,1),
+          column.labels   = c("Dynamic CFScore", "Stable CFScore", "SM Score"),
+          column.separate = c(1,1,1),
           star.cutoffs = c(0.05, 0.01, 0.001),
           omit=c("Cyear"),
           style = 'apsr',
@@ -938,7 +948,7 @@ stargazer(modDyn, modNonDyn,
           covariate.labels =c("Ideological Distance Diff."),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser", "n"),
-          add.lines = list(c("N",Dyn$parameter+1, nonDyn$parameter+1)))
+          add.lines = list(c("N",Dyn$parameter+1, nonDyn$parameter+1, NPResultsTable$N[[3]])))
 
 
 ## Binomial Test Results
