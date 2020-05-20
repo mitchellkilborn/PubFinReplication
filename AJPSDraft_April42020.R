@@ -764,7 +764,7 @@ NPResultsTable<-readRDS("NPResultsTable.RDS")
 
 ## Subset to Arizona data only and select relevant variables
 aztest<-can_fe%>%filter(sab=="AZ")%>%
-  select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,NP_Score,
+  select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,
          recipient.cfscore.dyn,ran.general,CleanYear,CleanFirstRun,
          Distance_CFDyn,Distance_CFnonDyn, WonElection)%>%
   ## Convert year to numeric from factor to facilitate merging
