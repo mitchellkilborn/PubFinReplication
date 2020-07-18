@@ -81,7 +81,7 @@ SH02<-read.csv("SH02_2015UPDATE.csv", stringsAsFactors = FALSE)%>%
   filter((abb=="AZ" & Election_Year %in% c(2004:2010)) |
            (abb=="ME" & Election_Year %in% c(2004:2012)) |
            (abb=="CT" & Election_Year %in% c(2002:2010)) )%>%
-  select(abb, Sen, District, Election_Year, mrp_mean)
+  dplyr::select(abb, Sen, District, Election_Year, mrp_mean)
 
 ## 2000 Cycle Upper Chamber
 
@@ -96,7 +96,7 @@ SS02<-read.csv("SS02_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
   filter((abb=="AZ" & Election_Year %in% c(2004:2010)) |
            (abb=="ME" & Election_Year %in% c(2004:2012))|
            (abb=="CT" & Election_Year %in% c(2002:2010)))%>%
-  select(abb, Sen, District, Election_Year, mrp_mean)
+  dplyr::select(abb, Sen, District, Election_Year, mrp_mean)
 
 ## 2010 Cycle Lower Chamber
 
@@ -110,7 +110,7 @@ SH12<-read.csv("SH12_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
   filter((abb=="AZ" & Election_Year %in% c(2012:2016)) |
            (abb=="ME" & Election_Year %in% c(2014:2016))|
            (abb=="CT" & Election_Year %in% c(2012:2016)))%>%
-  select(abb, Sen, District, Election_Year, mrp_mean)
+  dplyr::select(abb, Sen, District, Election_Year, mrp_mean)
 
 ## 2010 Cycle Upper Chamber
 
@@ -124,7 +124,7 @@ SS12<-read.csv("SS12_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
   filter((abb=="AZ" & Election_Year %in% c(2012:2016)) |
            (abb=="ME" & Election_Year %in% c(2014:2016))|
            (abb=="CT" & Election_Year %in% c(2012:2016)))%>%
-  select(abb, Sen, District, Election_Year, mrp_mean)
+  dplyr::select(abb, Sen, District, Election_Year, mrp_mean)
 
 ## Bind together all observations, rename columns for clarity
 ## and ease of merging with other data.
@@ -132,7 +132,7 @@ SS12<-read.csv("SS12_2015UPDATE.csv",stringsAsFactors = FALSE)%>%
 MRP<-bind_rows(SH02, SH12, SS02, SS12)%>%
   mutate(State=abb,Election_Year=as.numeric(Election_Year),
          MRP_Mean=mrp_mean)%>%
-  select(-c(abb, mrp_mean))
+  dplyr::select(-c(abb, mrp_mean))
 
 
 
@@ -159,7 +159,7 @@ election_all<-election %>%
 
   ## Select relevant variables
 
-  select(year, sab, sen, dno, dvote, rvote, ovote, dcand,
+  dplyr::select(year, sab, sen, dno, dvote, rvote, ovote, dcand,
          rcand, ocand, dinc, rinc, oinc, dwin, rwin, owin, dinc2, rinc2, oinc2, dinc3,rinc3,oinc3)%>%
 
   ## Calculate top 2 vote share based on possible combinations of candidates
@@ -241,14 +241,15 @@ election_allres<-left_join(election_allres, MRP, by=c("year"="Election_Year", "s
 ## Missing ran.general for 2014
 fixed2014<-read.csv("MissingGeneralElectionAZCTMEFixed.csv", stringsAsFactors = FALSE)%>%
   distinct(bonica.rid, .keep_all=TRUE)%>%
-  select(-c(name,district, seat,state, X, MissingCandidates_2014))%>%
+  dplyr::select(-c(name,district, seat,state, X, MissingCandidates_2014))%>%
   mutate(ran.general_2014=ifelse(is.na(ran.general_2014),0, ran.general_2014))## Convert empty cells to 0
 ## Missing party for 2014-2016
 
-fixedMissingParty<-read.csv("Bonica_2014_2016MissingParty_Fixed.csv", stringsAsFactors = FALSE)%>%select(bonica.rid, cycle, party_fixed)
+fixedMissingParty<-read.csv("Bonica_2014_2016MissingParty_Fixed.csv", stringsAsFactors = FALSE)%>%
+  dplyr::select(bonica.rid, cycle, party_fixed)
 ## Missing incumbency variable 2016
 missingIncumbents2016<-read.csv("MissingIncumbency2016_fixed.csv", stringsAsFactors = FALSE)%>%
-  select(bonica.rid, cycle, Incum.Chall_2016)%>%distinct(bonica.rid, cycle, .keep_all = TRUE)
+  dplyr::select(bonica.rid, cycle, Incum.Chall_2016)%>%distinct(bonica.rid, cycle, .keep_all = TRUE)
 
 
 #### Read in Bonica Data####
@@ -271,7 +272,7 @@ bonica_ftm<-readRDS("FTM_BONICA_MERGE_AddedThru2016_V5.RDS")%>%
          ## Create empty tenure variables
          tenure1=0, tenure2=0)%>%
   ## drop un-needed variables from fixed data
-  select(-c(ran.general_2014,Incum.Chall_2014,party_fixed, Incum.Chall_2016))
+  dplyr::select(-c(ran.general_2014,Incum.Chall_2014,party_fixed, Incum.Chall_2016))
 
 #### Read in Klarner candidate specific election result data####
 
@@ -296,7 +297,7 @@ table<-table %>%
 
   ## Select relevant variables
 
-  select(state, Senate, District,election, tenure1, tenure2,combName, Partyk,outcome,NameMatchDistance)%>%
+  dplyr::select(state, Senate, District,election, tenure1, tenure2,combName, Partyk,outcome,NameMatchDistance)%>%
   arrange(state,Senate,District,election)
 
 ## Get tenure variables for incumbent candidates in BonicaFTM data by matching
@@ -381,6 +382,15 @@ summary(ideal_points_CF)
 
 ideal_points_DWDIME<-lm(dwdime~MRP_Mean, data=can_fe)
 summary(ideal_points_DWDIME)
+
+
+## Create simulation objects and save
+set.seed(02138)
+library(arm)
+ideal_points_CF_sims1000<-sim(ideal_points_CF, n.sims=1000)
+ideal_points_DWDIME_sims1000<-sim(ideal_points_DWDIME, n.sims=1000)
+saveRDS(ideal_points_CF_sims1000, file="ideal_points_CF_sims1000.RDS")
+saveRDS(ideal_points_DWDIME_sims1000, file="ideal_points_DWDIME_sims1000.RDS")
 
 
 ## Construct needed variables in combined dataset can_fe, which at this point consists of
@@ -509,17 +519,16 @@ for(i in 1:nrow(can_fe)){
 ## look<-can_fe%>%select(name,MatchName,CleanYear)%>%filter(CleanYear==1)
 
 
-
 ## Select variables used in below analysis
 can_fe<-can_fe%>%
-  select(year, sab, sen, dno,name,party,
+  dplyr::select(year, sab, sen, dno,name,party,
          bonica.rid,Distance_CFnonDyn, Distance_CFDyn,
-         UniqueDistrict_CensusGroup,
+         UniqueDistrict_CensusGroup,MRP_Mean,
          Census_Group, #need to include this for calcs below
          CensusLines,CleanYear, RedistTime,WonElection,
          CleanFirstRun,HasDistanceCFDyn, HasDistanceCFnonDyn,
          PFStatusSwitcher,Incumbent, seat,
-         recipient.cfscore,NP_Score,
+         recipient.cfscore,NP_Score,dwdime,
          recipient.cfscore.dyn,ran.general,
          HasDynamicCF,RepubIndicator,CompetitiveInteraction,CompetitiveElection,
          tenure1, Distance_DWDIME, HasDistanceDWDIME)
