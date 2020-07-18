@@ -6,7 +6,7 @@ row_rep <- function(df, n) {
 
 rm(list=ls())
 # install required packages if they are missing:
-list.of.packages <- c("tidyverse", "arm","tidymodels","MASS")
+list.of.packages <- c("tidyverse", "arm","tidymodels","MASS","lfe")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])];
 if(length(new.packages)){install.packages(new.packages)}
 lapply(list.of.packages, require, character.only = TRUE)
@@ -18,7 +18,6 @@ can_fe<-readRDS("can_fe.RDS")
 ## using arm sim function in AJPSDraft_April42020.R code
 ideal_points_CF_sims1000<-readRDS("ideal_points_CF_sims1000.RDS")
 ideal_points_DWDIME_sims1000<-readRDS("ideal_points_DWDIME_sims1000.RDS")
-
 
 ## Set number of simulations here, can increase when we decide
 ## this code works
@@ -39,7 +38,9 @@ SimDWDIME_Slopes<-rep(ideal_points_DWDIME_sims1000@coef[1:TotalReps,2], each=nro
 ## can_fe values except the coefs from the rogers equation change.
 GroupIndicator<-rep(1:TotalReps, each=nrow(can_fe))
 
-
+row_rep <- function(df, n) {
+  df[rep(1:nrow(df), times = n),]
+}
 
 ## Create TotalReps/N dataframes with simulated first stage coefficients taken from
 ## original Rogers regression using arm. Each `Group` has 
@@ -92,7 +93,7 @@ Table1Column1<-can_feSims%>%
                     reg_results=map(mod,~tidy(.)))%>%unnest(cols = c(reg_results))%>%
              dplyr::select(Group, estimate, std.error, mod)%>%
             ## Pull out summary stats (residual standard error), convert to tibble using unnest
-             mutate(detail = map(mod, ~ glance(.)))%>%unnest(cols=c(detail))%>%
+             mutate(detail = map(mod, ~ glance(.)))%>%unnest(cols=c(detail)) %>% 
             ## Simulate Residual SD from ChiSquare Distribution with df for each group
              mutate(ResidualStandardDeviation=sigma*sqrt(df/rchisq(1, df)),
             ## Get covariance, unscale (divide by sigma^2)
@@ -101,11 +102,12 @@ Table1Column1<-can_feSims%>%
                     ClusterVCV=unlist(mod)$clustervcv/sigma^2,
             ## Get 1 draw of simulated coefficient using ResidualSD2*Unscaled Covariance Matrix
                     CoefficientDraw=mvrnorm(1, estimate, ResidualStandardDeviation^2*ClusterVCV))%>%
-            ungroup()%>%
+            ungroup() %>% select(-mod)
             ## Get estimate and 95% CI across all draws
-             summarize(Estimate=quantile(estimate, .5),
-               CILow=quantile(estimate,.025),
-               CIHigh=quantile(estimate, .975))
+             
+Tab1Col1Ests = Table1Column1 %>% summarize(Estimate=quantile(CoefficientDraw, .5),
+                         CILow=quantile(CoefficientDraw,.025),
+                         CIHigh=quantile(CoefficientDraw, .975))
 
 ## End clock
 end.time <- Sys.time()

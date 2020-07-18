@@ -622,8 +622,6 @@ ChangesCTME<-Changes%>%filter(sab!="AZ")%>%group_by(Contrast)%>%
 ## distance metric due to missing recipient.cfscore.dyn or missing
 ## recipient.cfscore.
 
-
-
 ## Pooled States: Dynamic Distance Estimate with District and Year Fixed
 ## Effects, SEs clustered by district
 all_dyn<-felm(Distance_CFDyn~CleanYear|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
