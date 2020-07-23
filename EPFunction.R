@@ -367,7 +367,6 @@ Table2Column6Fit<-function(df){felm(Distance_CFnonDyn~CleanYear|UniqueDistrict_C
 Table2Column6<-EPMV(can_feSims,Table2Column6Fit)
 
 
-
 ## Effect size interpretation
 ## Quantile of ideological distance
 quantile(can_fe$Distance_CFDyn, na.rm = TRUE, probs=seq(0,1,.1))
@@ -626,25 +625,26 @@ stargazer(modD_W, modDDyn_W,modD_NP, modR_W, modRDyn_W,modR_NP,
 ## Formula: t-test formula
 EP_TTest<-function(frame, Formula){
   ## Create tibble to store results
-  Diffs<-tibble(SubEstimate=1:length(frame), DF=NA)
+  Diffs<-tibble(SubEstimate=1:length(frame), DF=NA, Draw=NA)
   ## Iterate through list of dfs with simulated distance coefficients
   for(i in 1:length(frame)){
     Mod<-Formula(frame[[i]])## Run ith t-test 
     Diffs$SubEstimate[i]<-Mod$estimate[[1]]## Store difference
     Diffs$DF[i]<-Mod$parameter[1]## Store DF
+    Diffs$Draw[i]<-rnorm(1, Mod$estimate[[1]], Mod$stderr)## Use estimate and SE to draw rnorm
   }
   
   ## Create empty lm object for stargazer output
     outMod<-lm(SubEstimate~DF, data=Diffs)
   
   ## Take center of distribution/SE, and calculate Pval
-  Diffs<-Diffs%>%summarize(Estimate=quantile(SubEstimate, .5),SE=sd(SubEstimate),
+  Diffs<-Diffs%>%summarize(Estimate=quantile(Draw, .5),SE=sd(Draw),
                           DF=mean(DF))%>%
                  mutate(P=2*pt(abs(Estimate/SE),DF,lower.tail=FALSE))
     outMod$coefficients[1]<-Diffs$Estimate
-    outMod$SE<-Diffs$SE## Store SE in rank variable
+    outMod$SE<-Diffs$SE## Store SE 
     outMod$N<-Diffs$DF+1## Store DF, add back 1 for N 
-    outMod$PValue<-Diffs$P
+    outMod$PValue<-Diffs$P## Store p-value calculated from t-distribution
     return(outMod)
 }
 
@@ -668,13 +668,13 @@ NPTT<-EP_TTest(pairedNPGCSims, NPTTest)
 ## observations from T-test object
 stargazer(CFDynTT, CFNonDynTT,NPTT,
           se=list(CFDynTT$SE, CFNonDynTT$SE, NPTT$SE),
-          p=list(CFDynTT$PValue, CFNonDynTT$PValue, NPTT$PValue),
+          p=list(CFDynTT$PValue[[1]], CFNonDynTT$PValue[[1]], NPTT$PValue[[1]]),
           model.names = FALSE, model.numbers = FALSE,
           dep.var.labels.include = FALSE,
           column.labels   = c("Dynamic CFscore", "Stable CFscore", "SM Score"),
           column.separate = c(1,1,1),
           star.cutoffs = c(0.05, 0.01, 0.001),
-          omit=c("Cyear"),
+          omit=c("DF"),
           style = 'apsr',
           table.placement = "H",
           title=c("Paired T-Test Estimates: Arizona State Legislative Candidate Ideological Proximity to District, 2000-2016"),
