@@ -230,7 +230,6 @@ election_allres<-left_join(election_allres, MRP, by=c("year"="Election_Year", "s
                                                       "dno"="District"))
 
 
-
 ## Because we extended the bonica ideology data to include 2014 and 2016, had to
 ## fill in missing ran.general field for 2014, missing party for 2014 and 2016,
 ## and missing incumbency for 2016 by hand
@@ -622,7 +621,9 @@ ChangesCTME<-Changes%>%filter(sab!="AZ")%>%group_by(Contrast)%>%
 ## distance metric due to missing recipient.cfscore.dyn or missing
 ## recipient.cfscore.
 
-
+## Calculate mean and SD for explication
+mean(can_fe$Distance_CFDyn, na.rm=TRUE)
+sd(can_fe$Distance_CFDyn, na.rm=TRUE) 
 
 ## Pooled States: Dynamic Distance Estimate with District and Year Fixed
 ## Effects, SEs clustered by district

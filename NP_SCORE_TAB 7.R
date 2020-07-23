@@ -303,6 +303,7 @@ mrp_distcalc<-left_join(shor_az , MRP, by=c("Election_Year"="Election_Year",
 ## Drop independents, MRP scores available starting 2004
               filter(Election_Year>=2004 & party !="X")
 
+#saveRDS(mrp_distcalc, file="NPResultsBaseFrame.RDS")
 ## Regress legislator ideology on district ideology
 ideal_points_NP<-lm(np_score~MRP_Mean, data=mrp_distcalc)
 summary(ideal_points_NP)
