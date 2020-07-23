@@ -317,7 +317,7 @@ EPMV<-function(frame, ModelFormula){
   finalStore<-finalStore%>%group_by(CoefNames)%>%
     summarize(Estimate=quantile(CoefficientDraw, .5),SE=sd(CoefficientDraw),
               DF=mean(DF))%>%
-    mutate(PValue= 2*pt(abs(Estimate/SE),DF,lower.tail=FALSE))
+    mutate(PValue= 2*pt(abs(Estimate/SE),DF,lower.tail=FALSE)) 
   ## Store simulated coefficient, SE, and pval in felm object to return for
   ## easy compatibility with stargazer.
   outMod<-ModelFormula(frame[[i]])
