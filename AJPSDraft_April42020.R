@@ -230,7 +230,6 @@ election_allres<-left_join(election_allres, MRP, by=c("year"="Election_Year", "s
                                                       "dno"="District"))
 
 
-
 ## Because we extended the bonica ideology data to include 2014 and 2016, had to
 ## fill in missing ran.general field for 2014, missing party for 2014 and 2016,
 ## and missing incumbency for 2016 by hand
@@ -687,7 +686,7 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
 ## Quantile of ideological distance
 quantile(can_fe$Distance_CFDyn, na.rm = TRUE, probs=seq(0,1,.1))
 
-## Proportion of SD 
+## Proportion of SD
 all_dyn$coefficients[1]/sd(can_fe$Distance_CFDyn, na.rm = TRUE)
 
 ####Table 3 Candidate Fixed Effects####
@@ -698,9 +697,9 @@ all_dyn$coefficients[1]/sd(can_fe$Distance_CFDyn, na.rm = TRUE)
 switchers<-nrow(can_fe %>% filter(CleanYear != CleanFirstRun)%>%
                   distinct(bonica.rid))
 all<-can_fe%>%filter(CleanYear==1)%>%distinct(bonica.rid)%>%count()%>%pull()
-paste0(round(100*switchers/all, digits=1), "\\%", 
+paste0(round(100*switchers/all, digits=1), "\\%",
        " candidates switched financing status between 2000 and 2016 ",
-       "(", switchers, " of ", all, ")") 
+       "(", switchers, " of ", all, ")")
 
 
 ## Add candidate fixed effects to Table 2 with district and year fixed effects.
@@ -818,7 +817,7 @@ pairedDemsGC<-filter(cleanGC, Cparty=="100")
 pairedRepsGC<-filter(cleanGC, Cparty=="200")
 pairedGC<-bind_rows(pairedDemsGC,pairedRepsGC)%>%
   mutate(CLMoreExtremeDyn=ifelse(CDistance_CFDyn > UCDistance_CFDyn,1,0),
-         CLMoreExtremeNonDyn=ifelse(CDistance_CFnonDyn> 
+         CLMoreExtremeNonDyn=ifelse(CDistance_CFnonDyn>
                                       UCDistance_CFnonDyn, 1,0))
 
 ## Select Democrat and Republican winners and create stacked observations
@@ -918,8 +917,8 @@ stargazer(modD_W, modDDyn_W,modD_NP, modR_W, modRDyn_W,modR_NP,
           covariate.labels =c("CFscore Difference"),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser","n"),
-          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1, 
-                             NPResultsTable$N[[1]],nonDynR_W$parameter+1, 
+          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1,
+                             NPResultsTable$N[[1]],nonDynR_W$parameter+1,
                              DynR_W$parameter+1,NPResultsTable$N[[2]])))
 
 #### Table 6 Paired T-Test Ideological Distance GE Candidates####
@@ -958,12 +957,12 @@ stargazer(modDyn, modNonDyn,modNPDist,
           add.lines = list(c("N",Dyn$parameter+1, nonDyn$parameter+1, NPResultsTable$N[[3]])))
 
 ## Binomial Test Results
-## Dynamic CFScore Estimates: For how many cases does the 
+## Dynamic CFScore Estimates: For how many cases does the
 ## publicly funded candidate have a larger CFScore distance
 sum(pairedGC$CLMoreExtremeDyn, na.rm = TRUE)/sum(!is.na(pairedGC$CLMoreExtremeDyn))
 binom.test(sum(pairedGC$CLMoreExtremeDyn, na.rm = TRUE),sum(!is.na(pairedGC$CLMoreExtremeDyn)), .5)
 
-## Static CFScore Estimates: For how many cases does the 
+## Static CFScore Estimates: For how many cases does the
 ## publicly funded candidate have a larger CFScore distance
 sum(pairedGC$CLMoreExtremeNonDyn, na.rm = TRUE)/sum(!is.na(pairedGC$CLMoreExtremeNonDyn))
 binom.test(sum(pairedGC$CLMoreExtremeNonDyn, na.rm = TRUE), sum(!is.na(pairedGC$CLMoreExtremeNonDyn)), .5)
@@ -989,15 +988,15 @@ binom.test(sum(pairedGC$CLMoreExtremeNonDyn, na.rm = TRUE), sum(!is.na(pairedGC$
 ## level and also contains counts for clean candidates at the district level.
 
 valence<-election_allres%>%
-  
+
   ## Drop Arizona house districts which are multi-member, hard to map
   ## candidate public financing status onto voteshare in two candidate context and
   ## have results be comparable to single member districts
-  
+
   filter(!(sab=="AZ" & sen==0))%>%
   ## If district-year observation doesn't have any Clean candidates, will have a
   ## NA from count_district, so we need to convert NAs to zero.
-  
+
   mutate(CleanRepub=ifelse(is.na(CleanRepub)==TRUE, 0, CleanRepub),
          CleanDem=ifelse(is.na(CleanDem)==TRUE, 0, CleanDem),
          CleanOth=ifelse(is.na(CleanOth)==TRUE,0,CleanOth),
@@ -1119,7 +1118,7 @@ stargazer(Missing,
 
 ## Interact candidate incumbency status with clean election status
 incumb_cf<-felm(Distance_CFDyn~CleanYear*Incumbent|UniqueDistrict_CensusGroup+year|0|UniqueDistrict_CensusGroup,
-                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1) 
+                data=can_fe, subset=CensusLines==1 & HasDistanceCFDyn==1)
 summary(incumb_cf)
 
 
@@ -1199,12 +1198,12 @@ changeDistricts<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
                        group_by(UniqueDistrict_CensusGroup,CompetitiveElection)%>%
                        count()%>%
                        group_by(UniqueDistrict_CensusGroup)%>%count()%>%filter(n>1)
-                       
+
 totalDistricts<-can_fe%>%filter(CensusLines==1 & HasDistanceCFDyn==1)%>%
   select(UniqueDistrict_CensusGroup)%>%
   distinct()%>%group_by(UniqueDistrict_CensusGroup)%>%count()
 
-paste(round(nrow(changeDistricts)/nrow(totalDistricts)*100), 
+paste(round(nrow(changeDistricts)/nrow(totalDistricts)*100),
 "% of redistricting specific cycle districts see a change in competitiveness in our sample", sep="")
 
 ####SI-A5 State By State Analysis####
@@ -1356,7 +1355,7 @@ stargazer(all_dyn,all_dyn_party,all_dyn_party_trend,all_ndyn,all_ndyn_party,all_
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
                            c("Party Fixed Effects", "", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark"),
                            c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
-          
+
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
