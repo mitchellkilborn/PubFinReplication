@@ -72,7 +72,7 @@ ideal_points_DWDIME_sims1000<-readRDS("ideal_points_DWDIME_sims1000.RDS")
 
 ## Set number of simulations here, can increase when we decide
 ## this code works
-TotalReps<-10
+TotalReps<-1000
 
 ## Create vectors of intercepts and coefficients which are 
 ## length of can_fe dataframe for simulation purposes. Note
@@ -303,8 +303,10 @@ EPMV<-function(frame, ModelFormula){
     store<-tibble(Run=rep(i,length(subMod$coefficients)), ## Mark which ith run of the model
                   Coefs=c(unlist(subMod$coefficients)),## Store coefficient values
                   CoefNames= c(row.names(subMod$coefficients)),## Store coefficient names
-                  ResidualStandardDeviation=subMod$rse*sqrt(subMod$df/rchisq(1, subMod$df)), ## Calculate RSD
-                  N=subMod$N, DF= subMod$df)## Store N and DF
+                  ## Store N, p (total coefs, including those projected out) and DF
+                  N=subMod$N, CoefTotal= subMod$p, DF=N-CoefTotal,
+                  ResidualStandardDeviation=subMod$rse*sqrt(DF/rchisq(1, DF))) ## Calculate RSD
+                
   ## Coefficient draw from multivariate normal distribution
     store$CoefficientDraw<-mvrnorm(1, store$Coefs, 
                                    store$ResidualStandardDeviation^2*(subMod$clustervcv/subMod$rse^2))
@@ -387,7 +389,8 @@ stargazer(Table2Column1, Table2Column2,Table2Column3,Table2Column4,Table2Column5
           table.placement = "H",
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CoreResults"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses."),
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11"),
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
@@ -418,17 +421,17 @@ Table3Column1Fit<-function(df){felm(Distance_CFDyn~CleanYear|bonica.rid+year+Uni
 Table3Column1<-EPMV(can_feSims,Table3Column1Fit)
 
 ## Add candidate incumbency variable, SEs clustered by candidate
-Table3Column2Fit<-function(df){felm(Distance_CFDyn~CleanYear|bonica.rid+year+UniqueDistrict_CensusGroup+Incumbent|0|bonica.rid,
+Table3Column2Fit<-function(df){felm(Distance_CFDyn~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                                     data=df, subset=CensusLines==1& PFStatusSwitcher==1 & HasDistanceCFDyn==1)}
 Table3Column2<-EPMV(can_feSims,Table3Column2Fit)
 
 ## Subset by party: Democrats, candidate fixed effects, incumbency indicator, SEs clustered by candidate
-Table3Column3Fit<-function(df){felm(recipient.cfscore.dyn ~CleanYear|bonica.rid+year+UniqueDistrict_CensusGroup+Incumbent|0|bonica.rid,
+Table3Column3Fit<-function(df){felm(recipient.cfscore.dyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                                     data=df, subset=CensusLines==1& PFStatusSwitcher==1 &party==100 & HasDistanceCFDyn==1)}
 Table3Column3<-EPMV(can_feSims,Table3Column3Fit)
 
 ## Subset by party: Republican, candidate fixed effects, incumbency indicator, SEs clustered by candidate
-Table3Column4Fit<-function(df){felm(recipient.cfscore.dyn ~CleanYear|bonica.rid+year+UniqueDistrict_CensusGroup+Incumbent|0|bonica.rid,
+Table3Column4Fit<-function(df){felm(recipient.cfscore.dyn ~CleanYear+Incumbent|bonica.rid+year+UniqueDistrict_CensusGroup|0|bonica.rid,
                                     data=df, subset=CensusLines==1& PFStatusSwitcher==1& party==200 & HasDistanceCFDyn==1)}
 Table3Column4<-EPMV(can_feSims,Table3Column4Fit)
 
@@ -445,8 +448,8 @@ stargazer(Table3Column1, Table3Column2, Table3Column3, Table3Column4,
           table.placement = "H",
           title=c("Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CanFE"),
-          notes = c("Notes: Standard errors clustered", " by candidate in parentheses.",
-                    "Data subset to candidates who","switch public financing status between cycles."),
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11"),         
           covariate.labels =c("Public Financing Candidate", "Incumbent"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark","\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark","\\checkmark", "\\checkmark"),
@@ -670,9 +673,10 @@ stargazer(CFDynTT, CFNonDynTT,NPTT,
           se=list(CFDynTT$SE, CFNonDynTT$SE, NPTT$SE),
           p=list(CFDynTT$PValue[[1]], CFNonDynTT$PValue[[1]], NPTT$PValue[[1]]),
           model.names = FALSE, model.numbers = FALSE,
-          dep.var.labels.include = FALSE,
-          column.labels   = c("Dynamic CFscore", "Stable CFscore", "SM Score"),
-          column.separate = c(1,1,1),
+          dep.var.labels.include = TRUE,
+          dep.var.labels = c("Dynamic CFscore", "Stable CFscore", "SM Score"),
+          column.separate = c(2,1),
+          column.labels   = c("Candidates", "Legislators"),
           star.cutoffs = c(0.05, 0.01, 0.001),
           omit=c("DF"),
           style = 'apsr',
@@ -1010,7 +1014,8 @@ stargazer(Table2Column1,az_cf, ct_cf, me_cf,
           table.placement = "H",
           title=c("Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CTMEFE"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses."),
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11"),  
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark")),
@@ -1074,7 +1079,8 @@ stargazer(ipw_all_dyn,ipw_all_dyn_party,ipw_all_dyn_party_trend,ipw_all_ndyn,ipw
           table.placement = "H",
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects, Weighted by State"),
           label=c("tab:WeightedResults"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses.",
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11",
                     weightsLabel),
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
@@ -1138,7 +1144,8 @@ stargazer(tenure_all_dyn, tenure_all_dyn_party, tenure_all_dyn_party_trend,
           table.placement = "H",
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects"),
           label=c("tab:Tenure"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses."),
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11"),  
           covariate.labels =c("Public Financing Candidate", "Candidate Tenure"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
@@ -1180,7 +1187,8 @@ stargazer(all_dwdime,all_dwdime_subset,
           table.placement = "H",
           title=c("Candidate Ideological Distance to District: DW-DIME and CFScore Two Way Fixed Effects"),
           label=c("tab:DWDIME"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses."),
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11"),  
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark")),
@@ -1188,7 +1196,7 @@ stargazer(all_dwdime,all_dwdime_subset,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
 ## Comparison of Effect sizes
-sd(can_fe$Distance_DWDIME, na.rm=TRUE)
+all_dwdime$beta[1]/sd(can_fe$Distance_DWDIME, na.rm=TRUE)
 sd(can_fe$Distance_CFDyn, na.rm=TRUE)
 
 
@@ -1244,7 +1252,8 @@ stargazer(cfr_all_dyn, cfr_all_dyn_party, cfr_all_dyn_party_trend,
           table.placement = "H",
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CoreResults_alt"),
-          notes = c("Notes: Standard errors clustered", " by district in parentheses."),
+          notes = c("Notes: $\\beta$ \\& SEs reflect error propagation",
+                    "method described in SI-A11"),  
           covariate.labels =c("Publicly Financed First Campaign"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
