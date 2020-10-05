@@ -1,9 +1,3 @@
-## Load libraries (will paste in nice formatting for top part
-## once we finalize the main code header. I need to
-## figure out the packrat packge to for package version
-## control)
-
-
 #########################################################
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##

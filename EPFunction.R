@@ -13,7 +13,7 @@
 rm(list=ls())
 # install required packages if they are missing:
 list.of.packages <- c("tidyverse", "stargazer","scales","sjPlot","lfe","stringdist","readstata13",
-                      "tidymodels","arm","MASS")
+                      "arm","MASS")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])];
 if(length(new.packages)){install.packages(new.packages)}
 lapply(list.of.packages, require, character.only = TRUE)
@@ -32,17 +32,15 @@ packinfo[which(packinfo$Package %in% list.of.packages),c("Package", "Version")]
 # sjPlot           sjPlot    2.8.2
 # stargazer     stargazer    5.2.2
 # stringdist   stringdist  0.9.5.5
-# tidymodels   tidymodels    0.1.0
 # tidyverse     tidyverse    1.3.0
 # 
 
 #############################Session Info#######################################
 
 sessionInfo()
-# R version 3.6.2 (2019-12-12)
-# Platform: x86_64-apple-darwin15.6.0 (64-bit)
-# Running under: macOS Catalina 10.15.5
-# July 22, 2020
+# R version 4.0.2 (2020-06-22)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Catalina 10.15.6
 
 
 #############################Functions#######################################
