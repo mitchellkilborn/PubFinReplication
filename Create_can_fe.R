@@ -1,9 +1,9 @@
 #########################################################
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
-##    Code to recreate can_fe.RDS for                  ##
-##    "Public Money Talks Too: Clean Elections         ##
-##      and Representation in State Legislatures"      ##
+##            Code to recreate can_fe.RDS for          ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 
@@ -1368,9 +1368,9 @@ for(i in 1:nrow(can_fe)){
 ## see which names in FTM weren't in the matched data and added those in to the
 ## Bonica data, about 40 cases. So all names on the public financing list which
 ## have a matching candidate in the bonica data are in the matched data, bonica_ftm
-## I checked visually the first 200 matches and the last 100 matches
+## We checked visually the first 200 matches and the last 100 matches
 ## to ensure they are correct and the match
-## rate is 100%, so I feel good about the quality of this procedure.
+## rate is 100%.
 ## look object allows you to compare matches
 ## look<-can_fe%>%select(name,MatchName,CleanYear)%>%filter(CleanYear==1)
 

@@ -3,17 +3,23 @@
 ##                 Arjun Vishwanath                    ##
 ##    Code for Tables Tables 2, 3, G.1, G.2,           ##
 ##                  G.3, G.4, G.5.                     ##
-##    "Public Money Talks Too: Clean Elections         ##
-##      and Representation in State Legislatures"      ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 
+## Output everything to log file
+sink (file="Log Analysis Public Money Talks Too.txt", append=FALSE, type="output", split=FALSE)
 
+
+## Set working directory to whatever directory RunAnalyses.R is in
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ###################Load Required Libraries#############################
 
 rm(list=ls())
 # install required packages if they are missing:
-list.of.packages <- c("tidyverse", "stargazer","scales","sjPlot","lfe","stringdist","readstata13")
+list.of.packages <- c("tidyverse", "stargazer","scales",
+                      "sjPlot","lfe","stringdist","readstata13")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])];
 if(length(new.packages)){install.packages(new.packages)}
 lapply(list.of.packages, require, character.only = TRUE)
@@ -32,6 +38,8 @@ packinfo[which(packinfo$Package %in% list.of.packages),c("Package", "Version")]
 ## stringdist                   0.9.6
 ## tidyverse                    1.3.0
 
+## Set options
+options(dplyr.summarise.inform=FALSE)
 
 #############################Session Info#######################################
 
@@ -42,15 +50,19 @@ sessionInfo()
 
 
 
+
+
 ####Set up Error Propagation Functions####
 
-## PrepEPFunctions.R prepares the can_fe.RDS and NPResultsBaseFrame.RDS datasets
+## PrepEPFunctions.R prepares the can_fe.RDS and NPAT/MRP datasets
 ## for error propagation method described in Appendix F. 
-## To run the analyses below, the user must have run this script.
+## To run the analyses below, the user must have run PrepEPFunctions.R.
 ## As the EP functions are computationally intensive, we allow
 ## the user to set the number of simulations with the TotalReps variable below
 ## before running PrepEPFunctions.R.
-## The manuscript uses 1000 simulations.
+## The manuscript uses 1000 simulations, but setting TotalReps to a lower number
+## will save time. As the error created in the first stage procedure is minimal,
+## changing TotalReps doesn't significantly affect results.
 
 TotalReps<-10
 source("PrepEPFunctions.R")
@@ -98,10 +110,10 @@ Table2Column6<-EPMV(can_feSims,Table2Column6Fit)
 
 ## Effect size interpretation
 ## Quantile of ideological distance
-quantile(can_fe$Distance_CFDyn, na.rm = TRUE, probs=seq(0,1,.1))
+paste("Deciles of Ideological Distance Variable", c(quantile(can_fe$Distance_CFDyn, na.rm = TRUE, probs=seq(0,1,.1))))
 
 ## Proportion of SD 
-Table2Column1$beta[1]/sd(can_fe$Distance_CFDyn, na.rm = TRUE)
+paste("Coefficient Interpretation Table 1", Table2Column1$beta[1]/sd(can_fe$Distance_CFDyn, na.rm = TRUE))
 
 
 ## Create Latex Table
@@ -117,7 +129,7 @@ stargazer(Table2Column1, Table2Column2,Table2Column3,Table2Column4,Table2Column5
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CoreResults"),
           notes = c("\\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11"),
+                    "method described in SI Section F"),
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
@@ -125,7 +137,6 @@ stargazer(Table2Column1, Table2Column2,Table2Column3,Table2Column4,Table2Column5
                            c("District x Time Effects", "", "", "\\checkmark", "", "", "\\checkmark")),
           multicolumn = FALSE,
           omit.stat = c("rsq","adj.rsq","f","ser"))
-
 
 
 ####Table 3 Candidate Fixed Effects####
@@ -176,7 +187,7 @@ stargazer(Table3Column1, Table3Column2, Table3Column3, Table3Column4,
           title=c("Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CanFE"),
           notes = c("\\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11"),         
+                    "method described in SI Section F"),         
           covariate.labels =c("Public Financing Candidate", "Incumbent"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark","\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark","\\checkmark", "\\checkmark"),
@@ -335,7 +346,7 @@ dem_test<-left_join(cleanDems, uncleanDems, by=c("Election_Year"="Election_Year"
 dtest<-t.test(dem_test$CleanIdeology, dem_test$UncleanIdeology, na.rm=TRUE, paired = TRUE)
 
 ## Create lm models to incorporate T-Test results into stargazer
-modR_NP<-modD_NP<-lm(np_score~RanClean, data=dems)
+modR_NP<-modD_NP<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store Estimates for stargazer presentation below
 modR_NP$coefficients[1]<-rtest$estimate[[1]]
@@ -356,7 +367,7 @@ DynR_W<-t.test(pairedRepsW$Crecipient.cfscore.dyn, pairedRepsW$UCrecipient.cfsco
 
 
 ## Create lm models to incorporate T-Test results into stargazer
-modD_W<-modDDyn_W<-modR_W<-modRDyn_W<-modD_NP<-modR_NP<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
+modD_W<-modDDyn_W<-modR_W<-modRDyn_W<-lm(Crecipient.cfscore~Cyear, data=pairedDemsW)
 
 ## Store Estimate
 modD_W$coefficients[1]<-nonDynD_W$estimate[[1]]
@@ -366,9 +377,9 @@ modRDyn_W$coefficients[1]<-DynR_W$estimate[[1]]
 
 stargazer(modD_W, modDDyn_W,modD_NP, modR_W, modRDyn_W,modR_NP,
           se=list(nonDynD_W$stderr, DynD_W$stderr,dtest$stderr,
-                  nonDynR_W$stderr, DynR_W$stderr,rtest$stderr,
+                  nonDynR_W$stderr, DynR_W$stderr,rtest$stderr),
                   p=list(nonDynD_W$p.value, DynD_W$p.value,dtest$p.value,
-                         nonDynR_W$p.value, DynR_W$p.value,rtest$p.value,
+                         nonDynR_W$p.value, DynR_W$p.value,rtest$p.value),
                          model.names = FALSE, model.numbers = FALSE,
                          dep.var.labels = c("Stable CFscore", "Dynamic CFscore", "SM Score",
                                             "Stable CFscore", "Dynamic CFscore", "SM Score"),
@@ -384,8 +395,8 @@ stargazer(modD_W, modDDyn_W,modD_NP, modR_W, modRDyn_W,modR_NP,
                          multicolumn = FALSE,
                          omit.stat = c("rsq","adj.rsq","f","ser","n"),
                          add.lines = list(c("N",  nonDynD_W$parameter+1, DynD_W$parameter+1, 
-                                            NPResultsTable$N[[1]],nonDynR_W$parameter+1, 
-                                            DynR_W$parameter+1,NPResultsTable$N[[2]])))
+                                            dtest$parameter+1,nonDynR_W$parameter+1, 
+                                            DynR_W$parameter+1,rtest$parameter+1)))
                   
 #### Table 6 Paired T-Test Ideological Distance GE Candidates####
 
@@ -428,6 +439,12 @@ stargazer(CFDynTT, CFNonDynTT,NPTT,
 
 
 
+
+
+####SI Section A Public Financing Overview Plots####
+
+## See PlotA1_A2.R
+source("PlotA1_A2.R")
 ####SI Section C Valence Analysis####
 
 ## Do public financing candidates receive higher voteshare?
@@ -441,7 +458,7 @@ valence<-readRDS("Valence.RDS")
 valence_mod_rep<-felm(RepVS~CleanFactor+dinc+rinc+oinc+ocand+dcand+rcand|
                         year:sab+UniqueDistrict_CensusGroup|0|UniqueDistrict_CensusGroup, data=valence,
                       subset=CensusLines==1)
-summary(valence_mod_rep)
+#summary(valence_mod_rep)
 
 ## Valence Analysis: Regress Republican Voteshare on Indicators, add district x
 ## redistricting cycle time trend to previous specification, remove time fixed
@@ -450,7 +467,7 @@ summary(valence_mod_rep)
 valence_mod_rep_tt<-felm(RepVS~CleanFactor+dinc+rinc+oinc+ocand+dcand+rcand|
                            RedistTime:UniqueDistrict_CensusGroup+sab|0|UniqueDistrict_CensusGroup, data=valence,
                          subset=CensusLines==1)
-summary(valence_mod_rep_tt)
+#summary(valence_mod_rep_tt)
 
 
 ## Create latex table for code
@@ -484,7 +501,7 @@ stargazer(valence_mod_rep,valence_mod_rep_tt,
 ## Regress NP-Score on indicator for whether a legislator had a dynamic CFScore.
 ## Include party, state, and year fixed effects, cluster SEs by state.
 ## No significant difference in legislator ideology by CF-Score missingness
-Missing<-felm(NP_Score~HasDynamicCF|party+sab+year|0|sab, data=can_fe)
+#Missing<-felm(NP_Score~HasDynamicCF|party+sab+year|0|sab, data=can_fe)
 summary(Missing)
 
 stargazer(Missing,
@@ -617,8 +634,8 @@ az_cf<-EPMV(can_feSims,az_cfFit)
 
 ## Effect size interpretation
 ## Quantile of ideological distance
-quantile(can_fe$Distance_CFDyn, na.rm = TRUE, probs=seq(0,1,.1))
-sd(can_fe$Distance_CFDyn, na.rm = TRUE)
+paste("Deciles of Ideological Distance Variable", quantile(can_fe$Distance_CFDyn, na.rm = TRUE, probs=seq(0,1,.1)))
+paste("Ideological Distance Variable SD:", sd(can_fe$Distance_CFDyn, na.rm = TRUE))
 
 ## Calculate pooled variance
 ## Count total numbers observations for each state
@@ -638,7 +655,7 @@ pooledSE <- sqrt((((nObs[1] - 1) * az_cf$cse[1] ^ 2) + ((nObs[2] - 1) * ct_cf$cs
 ## Averaged coef T-stat
 tstat = AvgCoef/pooledSE
 df = (sum(nObs) - 3)
-1-pt(tstat,df=df) #p-value
+paste("P Value for pooled Public Financing Candidate coefficient", 1-pt(tstat,df=df)) #p-value
 
 ## Create latex table for state by state regression
 stargazer(Table2Column1,az_cf, ct_cf, me_cf,
@@ -654,7 +671,7 @@ stargazer(Table2Column1,az_cf, ct_cf, me_cf,
           title=c("Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CTMEFE"),
           notes = c("\\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11"),  
+                    "method described in SI Section F"),  
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark")),
@@ -719,7 +736,7 @@ stargazer(ipw_all_dyn,ipw_all_dyn_party,ipw_all_dyn_party_trend,ipw_all_ndyn,ipw
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects, Weighted by State"),
           label=c("tab:WeightedResults"),
           notes = c("\\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11",
+                    "method described in SI Section F",
                     weightsLabel),
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
@@ -784,7 +801,7 @@ stargazer(tenure_all_dyn, tenure_all_dyn_party, tenure_all_dyn_party_trend,
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects"),
           label=c("tab:Tenure"),
           notes = c("\\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11"),  
+                    "method described in SI Section F"),  
           covariate.labels =c("Public Financing Candidate", "Candidate Tenure"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
@@ -827,7 +844,7 @@ stargazer(all_dwdime,all_dwdime_subset,
           title=c("Candidate Ideological Distance to District: DW-DIME and CFScore Two Way Fixed Effects"),
           label=c("tab:DWDIME"),
           notes = c("\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11"),  
+                    "method described in SI Section F"),  
           covariate.labels =c("Public Financing Candidate"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark")),
@@ -835,8 +852,8 @@ stargazer(all_dwdime,all_dwdime_subset,
           omit.stat = c("rsq","adj.rsq","f","ser"))
 
 ## Comparison of Effect sizes
-all_dwdime$beta[1]/sd(can_fe$Distance_DWDIME, na.rm=TRUE)
-sd(can_fe$Distance_CFDyn, na.rm=TRUE)
+paste("DWDIME Effect Size Interpretation:", all_dwdime$beta[1]/sd(can_fe$Distance_DWDIME, na.rm=TRUE))
+paste("SD of Distance_CFDyn:", sd(can_fe$Distance_CFDyn, na.rm=TRUE))
 
 
 
@@ -892,7 +909,7 @@ stargazer(cfr_all_dyn, cfr_all_dyn_party, cfr_all_dyn_party_trend,
           title=c("Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects"),
           label=c("tab:CoreResults_alt"),
           notes = c("\\textit{Note}: $\\beta$ \\& SEs reflect error propagation",
-                    "method described in SI-A11"),  
+                    "method described in SI Section F"),  
           covariate.labels =c("Publicly Financed First Campaign"),
           add.lines = list(c("District Fixed Effects", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark", "\\checkmark"),
                            c("Election Year Fixed Effects", "\\checkmark", "\\checkmark", "", "\\checkmark", "\\checkmark", ""),
@@ -955,5 +972,5 @@ mrp_paired_test<-left_join(clean_mrpdist, unclean_mrpdist, by=c("Election_Year"=
 binom.test(sum(mrp_paired_test$CLMoreExtreme, na.rm = TRUE),
            sum(!is.na(mrp_paired_test$CLMoreExtreme)),(1/2))
 
-
-
+## Close sink stack
+sink()

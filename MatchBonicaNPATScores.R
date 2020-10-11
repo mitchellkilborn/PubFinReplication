@@ -2,8 +2,8 @@
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
 ##     Code to merge NPAT scores to Bonica Data        ##
-##    "Public Money Talks Too: Clean Elections         ##
-##      and Representation in State Legislatures"      ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 

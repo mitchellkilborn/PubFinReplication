@@ -2,8 +2,8 @@
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
 ##              Creates paired AZ data                 ##
-##    "Public Money Talks Too: Clean Elections         ##                  
-##      and Representation in State Legislatures"      ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 ###################Load Required Libraries#############################

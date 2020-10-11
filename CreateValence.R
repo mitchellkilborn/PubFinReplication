@@ -2,8 +2,8 @@
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
 ##        Code to recreate Valence.RDS for             ##
-##    "Public Money Talks Too: Clean Elections         ##
-##      and Representation in State Legislatures"      ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 
@@ -215,5 +215,5 @@ valence<-election_allres%>%
                 dinc, rinc, oinc, 
                 ocand,dcand,rcand, RedistTime, CensusLines, RepVS)
 
-saveRDS(valence, "Valence.RDS")
+#saveRDS(valence, "Valence.RDS")
 

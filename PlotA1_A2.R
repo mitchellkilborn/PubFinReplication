@@ -2,8 +2,8 @@
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
 ##        Code to plot Figures A.1 & A.2 for           ##
-##    "Public Money Talks Too: Clean Elections         ##
-##      and Representation in State Legislatures"      ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 # install required packages if they are missing:

@@ -2,8 +2,8 @@
 ##                 Mitchell Kilborn                    ##
 ##                 Arjun Vishwanath                    ##
 ##    Replication code for Error Propagation Method in ##
-##    "Public Money Talks Too: Clean Elections         ##
-##      and Representation in State Legislatures"      ##
+##        "Public Money Talks Too: How Public          ##
+##     Campaign Financing Degrades Representation"     ##
 #########################################################
 
 
@@ -43,46 +43,38 @@ sessionInfo()
 
 #############################Functions#######################################
 '%!in%' <- function(x,y)!('%in%'(x,y))
-substrRight <- function(x, n){##Reverse substring function
-  substr(x, nchar(x)-n+1, nchar(x))
-}
 row_rep <- function(df, n) {
   df[rep(1:nrow(df), times = n),]
 }
-loadRData <- function(fileName){
-  #loads an RData file, and returns it
-  load(fileName)
-  get(ls()[ls() != "fileName"])
-}
-
 
 ####Prepare simulated can_fe####
 ## Load in can_fe dataset
 can_fe<-readRDS("can_fe.RDS")
 
-## Load in simulated first stage coefficients. Simulations done
-## using arm sim function in Create_can_fe.R code
+## Load in simulated first stage coefficients for recipient.cfscore
+## and dwdime variables.
+## Simulations done using arm sim function in Create_can_fe.R code
 ideal_points_CF_sims1000<-readRDS("ideal_points_CF_sims1000.RDS")
 ideal_points_DWDIME_sims1000<-readRDS("ideal_points_DWDIME_sims1000.RDS")
 
 
-## Set number of simulations here, can increase when we decide
-## this code works
-#TotalReps<-1000
+## Set number of iterations
+## If user doesn't specify number of iterations, use 1000
+if(!exists("TotalReps")){TotalReps<-1000}
 
-## Create vectors of intercepts and coefficients which are 
-## length of can_fe dataframe for simulation purposes. Note
-## that because we are only doing 100 reps, we don't need the entire
-## simulated coefficient vector yet, just the first 100 simulated coefficients
+## Create Total_Reps vectors of first stage intercepts and coefficients which are 
+## length of can_fe dataframe. Do this both for the slope/intercepts
+## for recipient.cfscore and DWDIME. 
 SimCF_Intercepts<-rep(ideal_points_CF_sims1000@coef[1:TotalReps,1], each=nrow(can_fe))
 SimCF_Slopes<-rep(ideal_points_CF_sims1000@coef[1:TotalReps,2], each=nrow(can_fe))
 SimDWDIME_Intercepts<-rep(ideal_points_DWDIME_sims1000@coef[1:TotalReps,1], each=nrow(can_fe))
 SimDWDIME_Slopes<-rep(ideal_points_DWDIME_sims1000@coef[1:TotalReps,2], each=nrow(can_fe))
 
 
-## Create group indicator needed to nest dataframes. Has to be same
-## length as stacked dataframes, where each dataframe has all the same
-## can_fe values except the coefs from the rogers equation change.
+## Create group indicator needed to sort nested dataframes.
+## Has to be same length as stacked dataframes, 
+## where each dataframe has all the same
+## can_fe values except that coefs from the Rogers (2017) equation change.
 GroupIndicator<-rep(1:TotalReps, each=nrow(can_fe))
 
 
@@ -98,23 +90,24 @@ weights_CFnonDyn<-can_fe%>%filter(CensusLines==1& HasDistanceCFnonDyn==1)%>%
 
 
 
-## Create TotalReps/N dataframes with simulated first stage coefficients taken from
+## Create TotalReps dataframes with simulated first stage coefficients taken from
 ## original Rogers regression using arm. Each `Group` has 
 ## a different set of simulated Slopes/Intercepts, but all the can_fe other
 ## variables are the same.
 ## Calculate the district ideal point and simulated candidate-district
-## distances for each of the TotalReps/N can_fe datasets
-## Store these 100 can_fe dataframe as can_feSims.
+## distances for each of the TotalReps can_fe datasets
+## Store these TotalReps can_fe dataframe as can_feSims.
 
 can_feSims<-readRDS("can_fe.RDS")%>%
-  left_join(weights_CFDyn, by=c("sab"))%>%
+  left_join(weights_CFDyn, by=c("sab"))%>%## Add IPW weights calculated above
   left_join(weights_CFnonDyn, by=c("sab"))%>%
-  row_rep(TotalReps)%>%
+  row_rep(TotalReps)%>%## Create TotalReps stacked versions of dataframe
+  ## Create columns with intercepts and slopes, 
   mutate(CF_Intercept=SimCF_Intercepts,
          CF_Slope=SimCF_Slopes,
          DWDIME_Intercept=SimDWDIME_Intercepts,
          DWDIME_Slope=SimDWDIME_Slopes,
-         Group=GroupIndicator,
+         Group=GroupIndicator,## Assign each replicated dataframe its Group Indicator
          ## Calculate the district ideal point and simulated candidate-distrit
          ## distances for each of the 1000 simulations. 
          EstimatedIdealPointCF=CF_Intercept+CF_Slope*MRP_Mean,
@@ -131,7 +124,8 @@ can_feSims<-readRDS("can_fe.RDS")%>%
 
 ## Have to create dyn and ndyn subsets because lfe
 ## throws error when trying to use subset and weights in same felm call
-## Divide simulated dataframes into list of dataframes.
+## Divide simulated dataframes into list of dataframes for IPW analysis in 
+## SI G.2 IPW Analysis
 can_fe_weights_dyn<-can_feSims%>%filter(CensusLines==1 &HasDistanceCFDyn==1)
 can_feSims_weights_dyn<-split(can_fe_weights_dyn, f = can_fe_weights_dyn$Group)
 
@@ -148,8 +142,10 @@ can_feSims<-split( can_feSims, f = can_feSims$Group)
 ## Create T-Test dataframe
 ## Subset to Arizona data only and select relevant variables
 aztest<-can_fe%>%filter(sab=="AZ")%>%
-  dplyr::select(year, sab, sen, dno, bonica.rid, name, party, seat, recipient.cfscore,
-                recipient.cfscore.dyn,ran.general,CleanYear,CleanFirstRun, WonElection, MRP_Mean)%>%
+  dplyr::select(year, sab, sen, dno, bonica.rid, name, 
+                party, seat, recipient.cfscore,
+                recipient.cfscore.dyn,ran.general,
+                CleanYear,CleanFirstRun, WonElection, MRP_Mean)%>%
   ## Convert year to numeric from factor to facilitate merging
   mutate(year=as.numeric(as.character(year)),
          DistrictYear=paste0(year,sab,sen,dno))
@@ -193,19 +189,18 @@ pairedDemsGC<-filter(cleanGC, Cparty=="100")
 pairedRepsGC<-filter(cleanGC, Cparty=="200")
 pairedGC<-bind_rows(pairedDemsGC,pairedRepsGC)
 
-## Create vectors of simulated intercepts and coefficients which are 
+## Create vectors with TotalReps length
+## of simulated intercepts and coefficients which are 
 ## length of pairedGC dataframe for simulation purposes.
 ## Note that we can reuse ideal_points_CF_sims1000 here
-## because we are studying the error in the Distance_CF/Distance_CFnondyn variables
-## Also note that because we are only doing TotalReps reps, we don't need the entire
-## simulated coefficient vector yet, just the first TotalRep simulated coefficients
+## because we are studying the error in the Distance_CF/Distance_CFnondyn variables.
 SimCF_Intercepts_TTest<-rep(ideal_points_CF_sims1000@coef[1:TotalReps,1], each=nrow(pairedGC))
 SimCF_Slopes_TTest<-rep(ideal_points_CF_sims1000@coef[1:TotalReps,2], each=nrow(pairedGC))
 
 
 ## Create group indicator needed to nest dataframes. Has to be same
 ## length as pairedGC, where each dataframe has all the same
-## pairedGC values except the coefs from the rogers equation change.
+## pairedGC values except the coefs from the Rogers (2017) equation change.
 GroupIndicatorTTest<-rep(1:TotalReps, each=nrow(pairedGC))
 
 ## Create TotalReps paired CFGCSims frames
@@ -237,7 +232,7 @@ mrp_distcalc<-readRDS("shor_az.RDS")%>%
 
 
 
-## Break mrp_distcalc into clean and nonclean variables
+## Break mrp_distcalc into clean and nonclean sections
 clean_mrpdist<-mrp_distcalc%>%filter( RanClean==1)
 colnames(clean_mrpdist)<-paste0("C", colnames(clean_mrpdist))
 
@@ -250,15 +245,19 @@ mrp_paired_test<-left_join(clean_mrpdist, unclean_mrpdist, by=c("CElection_Year"
                                                                 "Cparty"="UCparty"))%>%
   filter(is.na(Cnp_score)==FALSE & is.na(UCnp_score)==FALSE)
 
-## Create vectors of simulated intercepts and coefficients which are 
-## length of mrp_distcalc dataframe for simulation purposes. 
+
+## Use Rogers (2017) equation to calculate slope and intercept
+## using NPAT score as outcome variable.
 ideal_points_NP<-lm(np_score~MRP_Mean, data=mrp_distcalc)
 summary(ideal_points_NP)
 
-## Simulate using arm
+## Simulate coefficients and intercepts
+## plugging in NPAT scores to Rogers (2017) equation.
 set.seed(02138)
 ideal_points_NP_sims1000<-sim(ideal_points_NP, n.sims=1000)
 
+## Create Total_Reps vectors of simulated intercepts and coefficients which are 
+## length of mrp_distcalc dataframe for simulation purposes. 
 SimNP_Intercepts<-rep(ideal_points_NP_sims1000@coef[1:TotalReps,1], each=nrow(mrp_paired_test))
 SimNP_Slopes<-rep(ideal_points_NP_sims1000@coef[1:TotalReps,2], each=nrow(mrp_paired_test))
 
@@ -286,10 +285,10 @@ pairedNPGCSims<-split(pairedNPGCSims, f = pairedNPGCSims$Group)
 
 #### Error Propagation Multivariate Function####
 ## Takes arguments:
-## frame: List of can_fe simulations
+## frame: list of TotalReps dataframes with perturbed distance values
 ## ModelFormula: felm model formula
 ## Returns: outMod, felm object which has simulated coefs, SE, and p-value for stargazer
-## Covers multi-variate case, which previously broom/tidymodels format did not
+## Covers multi-variate regression formulae
 EPMV<-function(frame, ModelFormula){
   set.seed(02138)
   
@@ -332,8 +331,9 @@ EPMV<-function(frame, ModelFormula){
 
 #### EP function adapted for T-Test###
 ## Takes arguments:
-## frame: list of dataframes with TotalReps perturbed distance values
+## frame: list of TotalReps dataframes with perturbed distance values
 ## Formula: t-test formula
+## Returns: outMod, felm object which has simulated coefs, SE, and p-value for stargazer
 EP_TTest<-function(frame, Formula){
   ## Create tibble to store results
   Diffs<-tibble(SubEstimate=1:length(frame), DF=NA, Draw=NA)
