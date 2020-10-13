@@ -18,6 +18,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 rm(list=ls())
 # install required packages if they are missing:
+print("Check if required packages are installed.")
 list.of.packages <- c("tidyverse", "stargazer","scales",
                       "sjPlot","lfe","stringdist","readstata13")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])];
@@ -942,7 +943,7 @@ mrp_distcalc<-readRDS("shor_az.RDS")%>%
   filter(Election_Year>=2004 & party !="X")
 
 ideal_points_NP<-lm(np_score~MRP_Mean, data=mrp_distcalc)
-summary(ideal_points_NP)
+#summary(ideal_points_NP)
 ## Impute district ideal points on legislator scale
 mrp_distcalc<-mrp_distcalc %>%mutate(Intercept=ideal_points_NP$coefficients[1],
                                      phi1=ideal_points_NP$coefficients[2],

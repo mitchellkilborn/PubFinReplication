@@ -1,3 +1,4 @@
+[1] "Check if required packages are installed."
 [[1]]
 [1] TRUE
 
@@ -77,7 +78,7 @@ loaded via a namespace (and not attached):
 [1] "Coefficient Interpretation Table 1 0.268670102216604"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:06
+% Date and time: Mon, Oct 12, 2020 - 20:38:31
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects} 
   \label{tab:CoreResults} 
@@ -96,13 +97,13 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 \hline \\[-1.8ex] 
 \multicolumn{7}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{7}{l}{\textit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{7}{l}{method described in SI-A11} \\ 
+\multicolumn{7}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
 [1] "19.5\\% candidates switched financing status between 2000 and 2016 (459 of 2357)"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:09
+% Date and time: Mon, Oct 12, 2020 - 20:38:34
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects} 
   \label{tab:CanFE} 
@@ -122,12 +123,12 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \hline \\[-1.8ex] 
 \multicolumn{5}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{5}{l}{\textit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{5}{l}{method described in SI-A11} \\ 
+\multicolumn{5}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:09
+% Date and time: Mon, Oct 12, 2020 - 20:38:34
 \begin{table}[H] \centering 
   \caption{Paired T-Test Estimates: Arizona State Legislative Candidate Ideology, 2000-2016} 
   \label{tab:CFscoreTTest} 
@@ -145,7 +146,7 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:09
+% Date and time: Mon, Oct 12, 2020 - 20:38:34
 \begin{table}[H] \centering 
   \caption{Paired T-Test Estimates: Arizona State Legislator Ideology, 2000-2016} 
   \label{tab:CFscoreTTestLegislators} 
@@ -163,7 +164,7 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:09
+% Date and time: Mon, Oct 12, 2020 - 20:38:35
 \begin{table}[H] \centering 
   \caption{Paired T-Test Estimates: Arizona State Legislative Candidate Ideological Proximity to District, 2000-2016} 
   \label{tab:DistanceTTest} 
@@ -180,66 +181,8 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{tabular} 
 \end{table} 
 
-Call:
-   felm(formula = RepVS ~ CleanFactor + dinc + rinc + oinc + ocand +      dcand + rcand | year:sab + UniqueDistrict_CensusGroup | 0 |      UniqueDistrict_CensusGroup, data = valence, subset = CensusLines ==      1) 
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--0.179555 -0.024931 -0.000791  0.024584  0.189829 
-
-Coefficients:
-                        Estimate Cluster s.e. t value Pr(>|t|)    
-CleanFactorClean Repub  0.015809     0.007339   2.154  0.03154 *  
-CleanFactorClean Dem   -0.016501     0.005932  -2.782  0.00553 ** 
-CleanFactorBothClean    0.004176     0.006160   0.678  0.49797    
-dinc                   -0.035167     0.003938  -8.929  < 2e-16 ***
-rinc                    0.039966     0.004032   9.911  < 2e-16 ***
-oinc                   -0.023374     0.052749  -0.443  0.65781    
-ocand                   0.008132     0.006001   1.355  0.17577    
-dcand                  -0.376585     0.008521 -44.197  < 2e-16 ***
-rcand                   0.306523     0.008687  35.284  < 2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.0534 on 1619 degrees of freedom
-Multiple R-squared(full model): 0.9691   Adjusted R-squared: 0.9534 
-Multiple R-squared(proj model): 0.8329   Adjusted R-squared: 0.7475 
-F-statistic(full model, *iid*):61.45 on 827 and 1619 DF, p-value: < 2.2e-16 
-F-statistic(proj model): 556.4 on 9 and 805 DF, p-value: < 2.2e-16 
-
-
-
-Call:
-   felm(formula = RepVS ~ CleanFactor + dinc + rinc + oinc + ocand +      dcand + rcand | RedistTime:UniqueDistrict_CensusGroup + sab |      0 | UniqueDistrict_CensusGroup, data = valence, subset = CensusLines ==      1) 
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--0.276766 -0.035167  0.000347  0.035991  0.217998 
-
-Coefficients:
-                        Estimate Cluster s.e. t value Pr(>|t|)    
-CleanFactorClean Repub  0.018324     0.009437   1.942  0.05252 .  
-CleanFactorClean Dem   -0.020386     0.007858  -2.594  0.00965 ** 
-CleanFactorBothClean    0.004960     0.007988   0.621  0.53486    
-dinc                   -0.050087     0.004899 -10.223  < 2e-16 ***
-rinc                    0.059529     0.004921  12.098  < 2e-16 ***
-oinc                   -0.043361     0.047921  -0.905  0.36582    
-ocand                  -0.005297     0.008013  -0.661  0.50877    
-dcand                  -0.407697     0.010987 -37.107  < 2e-16 ***
-rcand                   0.332415     0.009312  35.699  < 2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.0709 on 1629 degrees of freedom
-Multiple R-squared(full model): 0.9452   Adjusted R-squared: 0.9178 
-Multiple R-squared(proj model): 0.7968   Adjusted R-squared: 0.6949 
-F-statistic(full model, *iid*):34.41 on 817 and 1629 DF, p-value: < 2.2e-16 
-F-statistic(proj model): 641.7 on 9 and 805 DF, p-value: < 2.2e-16 
-
-
-
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:11
+% Date and time: Mon, Oct 12, 2020 - 20:38:36
 \begin{table}[H] \centering 
   \caption{Public-Financing Valence Advantage: Two Way Fixed Effects 2004-2016} 
   \label{tab:Valence} 
@@ -268,59 +211,23 @@ N & 2,447 & 2,447 \\
 \multicolumn{3}{l}{ by district in parentheses.} \\ 
 \end{tabular} 
 \end{table} 
-
-Call:
-   felm(formula = NP_Score ~ HasDynamicCF | party + sab + year |      0 | sab, data = can_fe) 
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.82551 -0.24789 -0.01112  0.22455  1.92040 
-
-Coefficients:
-             Estimate Cluster s.e. t value Pr(>|t|)
-HasDynamicCF -0.03516      0.03254   -1.08    0.393
-
-Residual standard error: 0.3966 on 2102 degrees of freedom
-  (3902 observations deleted due to missingness)
-Multiple R-squared(full model): 0.8369   Adjusted R-squared: 0.836 
-Multiple R-squared(proj model): 0.0006649   Adjusted R-squared: -0.00504 
-F-statistic(full model, *iid*):898.9 on 12 and 2102 DF, p-value: < 2.2e-16 
-F-statistic(proj model): 1.167 on 1 and 2 DF, p-value: 0.393 
-*** Standard errors may be too high due to more than 2 groups and exactDOF=FALSE
-
-
-
-% Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:11
-\begin{table}[H] \centering 
-  \caption{Difference in NP-Score Among Legislators with Missing Dynamic CF-Score: Arizona, Connecticut, Maine 2000-2016} 
-  \label{tab:Missing} 
-\begin{tabular}{@{\extracolsep{5pt}}lc} 
-\\[-1.8ex]\hline \\[-1.8ex] 
- & All States \\ 
-\hline \\[-1.8ex] 
- Has Dynamic CFScore & $-$0.035 \\ 
-  & (0.033) \\ 
- State Fixed Effects & \checkmark \\ 
-Party Fixed Effects & \checkmark \\ 
-Election Year Fixed Effects & \checkmark \\ 
-N & 2,115 \\ 
-\hline \\[-1.8ex] 
-\multicolumn{2}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
-\multicolumn{2}{l}{	extit{Note}: Standard errors clustered} \\ 
-\multicolumn{2}{l}{ by state in parentheses.} \\ 
-\end{tabular} 
-\end{table} 
 [1] "37% of redistricting specific cycle districts see a change in competitiveness in our sample"
-          0%          10%          20%          30%          40%          50%          60%          70%          80%          90% 
-0.0006182101 0.3600951939 0.5515286774 0.6917740392 0.7940874256 0.8763940297 0.9607759483 1.0507522290 1.1524932830 1.2898625772 
-        100% 
-2.3738595720 
-[1] 0.3573273
-[1] 0.0008606701
+ [1] "Deciles of Ideological Distance Variable 0.000618210106637845"
+ [2] "Deciles of Ideological Distance Variable 0.360095193888365"   
+ [3] "Deciles of Ideological Distance Variable 0.551528677381665"   
+ [4] "Deciles of Ideological Distance Variable 0.691774039157396"   
+ [5] "Deciles of Ideological Distance Variable 0.794087425609627"   
+ [6] "Deciles of Ideological Distance Variable 0.876394029696353"   
+ [7] "Deciles of Ideological Distance Variable 0.960775948260089"   
+ [8] "Deciles of Ideological Distance Variable 1.05075222897901"    
+ [9] "Deciles of Ideological Distance Variable 1.15249328297892"    
+[10] "Deciles of Ideological Distance Variable 1.2898625772298"     
+[11] "Deciles of Ideological Distance Variable 2.3738595719571"     
+[1] "Ideological Distance Variable SD: 0.357327258345226"
+[1] "P Value for pooled Public Financing Candidate coefficient 0.000860670068676406"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:18
+% Date and time: Mon, Oct 12, 2020 - 20:38:43
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects} 
   \label{tab:CTMEFE} 
@@ -337,12 +244,12 @@ N & 4,533 & 944 & 1,545 & 2,044 \\
 \hline \\[-1.8ex] 
 \multicolumn{5}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{5}{l}{\textit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{5}{l}{method described in SI-A11} \\ 
+\multicolumn{5}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:23
+% Date and time: Mon, Oct 12, 2020 - 20:38:48
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects, Weighted by State} 
   \label{tab:WeightedResults} 
@@ -361,13 +268,13 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 \hline \\[-1.8ex] 
 \multicolumn{7}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{7}{l}{\textit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{7}{l}{method described in SI-A11} \\ 
+\multicolumn{7}{l}{method described in SI Section F} \\ 
 \multicolumn{7}{l}{AZ: 4.8 CT: 2.93 ME: 2.22} \\ 
 \end{tabular} 
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:29
+% Date and time: Mon, Oct 12, 2020 - 20:38:53
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects} 
   \label{tab:Tenure} 
@@ -388,12 +295,12 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 \hline \\[-1.8ex] 
 \multicolumn{7}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{7}{l}{\textit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{7}{l}{method described in SI-A11} \\ 
+\multicolumn{7}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:30
+% Date and time: Mon, Oct 12, 2020 - 20:38:55
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District: DW-DIME and CFScore Two Way Fixed Effects} 
   \label{tab:DWDIME} 
@@ -410,14 +317,14 @@ N & 902 & 902 \\
 \hline \\[-1.8ex] 
 \multicolumn{3}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{3}{l}{	extit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{3}{l}{method described in SI-A11} \\ 
+\multicolumn{3}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
-[1] 0.3008796
-[1] 0.3573273
+[1] "DWDIME Effect Size Interpretation: 0.300879634039005"
+[1] "SD of Distance_CFDyn: 0.357327258345226"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Oct 10, 2020 - 06:10:35
+% Date and time: Mon, Oct 12, 2020 - 20:39:00
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects} 
   \label{tab:CoreResults_alt} 
@@ -436,7 +343,7 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 \hline \\[-1.8ex] 
 \multicolumn{7}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
 \multicolumn{7}{l}{\textit{Note}: $\beta$ \& SEs reflect error propagation} \\ 
-\multicolumn{7}{l}{method described in SI-A11} \\ 
+\multicolumn{7}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
 [1] 0.7837838
@@ -464,25 +371,6 @@ alternative hypothesis: true probability of success is not equal to 0.5
 sample estimates:
 probability of success 
              0.7324561 
-
-
-Call:
-lm(formula = np_score ~ MRP_Mean, data = mrp_distcalc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--2.75594 -0.57018  0.05306  0.68768  2.37471 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -0.15332    0.03915  -3.916 0.000102 ***
-MRP_Mean     4.39151    0.17627  24.914  < 2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.8779 on 540 degrees of freedom
-Multiple R-squared:  0.5348,	Adjusted R-squared:  0.5339 
-F-statistic: 620.7 on 1 and 540 DF,  p-value: < 2.2e-16
 
 
 	Exact binomial test
