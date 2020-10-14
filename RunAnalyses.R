@@ -63,9 +63,11 @@ sessionInfo()
 ## before running PrepEPFunctions.R.
 ## The manuscript uses 1000 simulations, but setting TotalReps to a lower number
 ## will save time. As the error created in the first stage procedure is minimal,
-## changing TotalReps doesn't significantly affect results.
+## changing TotalReps doesn't significantly affect results, but for the 
+## results of RunAnalyses.R to match the paper, the user will have to
+## set TotalReps to 1000.
 
-TotalReps<-10
+TotalReps<-1000
 source("PrepEPFunctions.R")
 
 
@@ -502,8 +504,8 @@ stargazer(valence_mod_rep,valence_mod_rep_tt,
 ## Regress NP-Score on indicator for whether a legislator had a dynamic CFScore.
 ## Include party, state, and year fixed effects, cluster SEs by state.
 ## No significant difference in legislator ideology by CF-Score missingness
-#Missing<-felm(NP_Score~HasDynamicCF|party+sab+year|0|sab, data=can_fe)
-summary(Missing)
+Missing<-felm(NP_Score~HasDynamicCF|party+sab+year|0|sab, data=can_fe)
+#summary(Missing)
 
 stargazer(Missing,
           model.names = FALSE, model.numbers = TRUE,

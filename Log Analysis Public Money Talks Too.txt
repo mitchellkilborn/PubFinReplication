@@ -75,10 +75,10 @@ loaded via a namespace (and not attached):
  [9] "Deciles of Ideological Distance Variable 1.15249328297892"    
 [10] "Deciles of Ideological Distance Variable 1.2898625772298"     
 [11] "Deciles of Ideological Distance Variable 2.3738595719571"     
-[1] "Coefficient Interpretation Table 1 0.268670102216604"
+[1] "Coefficient Interpretation Table 1 0.284855063813745"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:31
+% Date and time: Wed, Oct 14, 2020 - 09:25:07
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects} 
   \label{tab:CoreResults} 
@@ -87,8 +87,8 @@ loaded via a namespace (and not attached):
  & \multicolumn{3}{c}{Dynamic CFScore Distance} & \multicolumn{3}{c}{Stable CFScore Distance} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- Public Financing Candidate & 0.096$^{***}$ & 0.095$^{***}$ & 0.101$^{***}$ & 0.125$^{***}$ & 0.064$^{***}$ & 0.075$^{***}$ \\ 
-  & (0.023) & (0.014) & (0.017) & (0.022) & (0.014) & (0.018) \\ 
+ Public Financing Candidate & 0.102$^{***}$ & 0.102$^{***}$ & 0.106$^{***}$ & 0.130$^{***}$ & 0.070$^{***}$ & 0.080$^{***}$ \\ 
+  & (0.020) & (0.018) & (0.016) & (0.019) & (0.018) & (0.017) \\ 
  District Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\ 
 Party Fixed Effects &  & \checkmark & \checkmark &  & \checkmark & \checkmark \\ 
@@ -103,7 +103,7 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 [1] "19.5\\% candidates switched financing status between 2000 and 2016 (459 of 2357)"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:34
+% Date and time: Wed, Oct 14, 2020 - 09:29:57
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects} 
   \label{tab:CanFE} 
@@ -112,10 +112,10 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
  & \multicolumn{2}{c}{Ideological Distance} & Democrats & Republicans \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
 \hline \\[-1.8ex] 
- Public Financing Candidate & 0.066$^{***}$ & 0.066$^{***}$ & $-$0.080$^{***}$ & 0.061$^{*}$ \\ 
-  & (0.011) & (0.012) & (0.019) & (0.024) \\ 
-  Incumbent &  & $-$0.035 & $-$0.061 & $-$0.063$^{*}$ \\ 
-  &  & (0.023) & (0.038) & (0.028) \\ 
+ Public Financing Candidate & 0.069$^{***}$ & 0.067$^{***}$ & $-$0.079$^{***}$ & 0.063$^{**}$ \\ 
+  & (0.014) & (0.013) & (0.022) & (0.023) \\ 
+  Incumbent &  & $-$0.028 & $-$0.052 & $-$0.055 \\ 
+  &  & (0.023) & (0.041) & (0.034) \\ 
  District Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Candidate Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark \\ 
@@ -128,7 +128,7 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:34
+% Date and time: Wed, Oct 14, 2020 - 09:29:57
 \begin{table}[H] \centering 
   \caption{Paired T-Test Estimates: Arizona State Legislative Candidate Ideology, 2000-2016} 
   \label{tab:CFscoreTTest} 
@@ -146,7 +146,7 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:34
+% Date and time: Wed, Oct 14, 2020 - 09:29:57
 \begin{table}[H] \centering 
   \caption{Paired T-Test Estimates: Arizona State Legislator Ideology, 2000-2016} 
   \label{tab:CFscoreTTestLegislators} 
@@ -164,7 +164,7 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:35
+% Date and time: Wed, Oct 14, 2020 - 09:29:58
 \begin{table}[H] \centering 
   \caption{Paired T-Test Estimates: Arizona State Legislative Candidate Ideological Proximity to District, 2000-2016} 
   \label{tab:DistanceTTest} 
@@ -173,8 +173,8 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \\[-1.8ex] & Dynamic CFscore & Stable CFscore & SM Score \\ 
  & \multicolumn{2}{c}{Candidates} & Legislators \\ 
 \hline \\[-1.8ex] 
- Ideological Distance Diff. & 0.233$^{***}$ & 0.207$^{***}$ & 0.093$^{**}$ \\ 
-  & (0.014) & (0.028) & (0.035) \\ 
+ Ideological Distance Diff. & 0.236$^{***}$ & 0.221$^{***}$ & 0.103$^{**}$ \\ 
+  & (0.026) & (0.027) & (0.034) \\ 
  N & 222 & 228 & 166 \\ 
 \hline \\[-1.8ex] 
 \multicolumn{4}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
@@ -182,7 +182,7 @@ N & 1,062 & 1,062 & 487 & 561 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:36
+% Date and time: Wed, Oct 14, 2020 - 09:29:59
 \begin{table}[H] \centering 
   \caption{Public-Financing Valence Advantage: Two Way Fixed Effects 2004-2016} 
   \label{tab:Valence} 
@@ -211,6 +211,28 @@ N & 2,447 & 2,447 \\
 \multicolumn{3}{l}{ by district in parentheses.} \\ 
 \end{tabular} 
 \end{table} 
+
+% Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Wed, Oct 14, 2020 - 09:29:59
+\begin{table}[H] \centering 
+  \caption{Difference in NP-Score Among Legislators with Missing Dynamic CF-Score: Arizona, Connecticut, Maine 2000-2016} 
+  \label{tab:Missing} 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline \\[-1.8ex] 
+ & All States \\ 
+\hline \\[-1.8ex] 
+ Has Dynamic CFScore & $-$0.035 \\ 
+  & (0.033) \\ 
+ State Fixed Effects & \checkmark \\ 
+Party Fixed Effects & \checkmark \\ 
+Election Year Fixed Effects & \checkmark \\ 
+N & 2,115 \\ 
+\hline \\[-1.8ex] 
+\multicolumn{2}{l}{$^{*}$p $<$ .05; $^{**}$p $<$ .01; $^{***}$p $<$ .001} \\ 
+\multicolumn{2}{l}{	extit{Note}: Standard errors clustered} \\ 
+\multicolumn{2}{l}{ by state in parentheses.} \\ 
+\end{tabular} 
+\end{table} 
 [1] "37% of redistricting specific cycle districts see a change in competitiveness in our sample"
  [1] "Deciles of Ideological Distance Variable 0.000618210106637845"
  [2] "Deciles of Ideological Distance Variable 0.360095193888365"   
@@ -224,10 +246,10 @@ N & 2,447 & 2,447 \\
 [10] "Deciles of Ideological Distance Variable 1.2898625772298"     
 [11] "Deciles of Ideological Distance Variable 2.3738595719571"     
 [1] "Ideological Distance Variable SD: 0.357327258345226"
-[1] "P Value for pooled Public Financing Candidate coefficient 0.000860670068676406"
+[1] "P Value for pooled Public Financing Candidate coefficient 8.29443538152841e-05"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:43
+% Date and time: Wed, Oct 14, 2020 - 09:37:21
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District: Arizona, Connecticut, Maine 2004-2016 Two Way Fixed Effects} 
   \label{tab:CTMEFE} 
@@ -236,8 +258,8 @@ N & 2,447 & 2,447 \\
  & All States & Arizona & Connecticut & Maine \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
 \hline \\[-1.8ex] 
- Public Financing Candidate & 0.096$^{***}$ & 0.323$^{***}$ & $-$0.102$^{**}$ & 0.082$^{**}$ \\ 
-  & (0.023) & (0.038) & (0.033) & (0.029) \\ 
+ Public Financing Candidate & 0.102$^{***}$ & 0.333$^{***}$ & $-$0.095$^{***}$ & 0.088$^{***}$ \\ 
+  & (0.020) & (0.037) & (0.029) & (0.024) \\ 
  District Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 N & 4,533 & 944 & 1,545 & 2,044 \\ 
@@ -249,7 +271,7 @@ N & 4,533 & 944 & 1,545 & 2,044 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:48
+% Date and time: Wed, Oct 14, 2020 - 09:45:19
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects, Weighted by State} 
   \label{tab:WeightedResults} 
@@ -258,8 +280,8 @@ N & 4,533 & 944 & 1,545 & 2,044 \\
  & \multicolumn{3}{c}{Dynamic CFscore Distance} & \multicolumn{3}{c}{Stable CFscore Distance} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- Public Financing Candidate & 0.133$^{***}$ & 0.141$^{***}$ & 0.148$^{***}$ & 0.151$^{***}$ & 0.105$^{***}$ & 0.120$^{***}$ \\ 
-  & (0.025) & (0.016) & (0.019) & (0.024) & (0.016) & (0.021) \\ 
+ Public Financing Candidate & 0.140$^{***}$ & 0.151$^{***}$ & 0.154$^{***}$ & 0.158$^{***}$ & 0.114$^{***}$ & 0.127$^{***}$ \\ 
+  & (0.022) & (0.020) & (0.018) & (0.022) & (0.021) & (0.020) \\ 
  District Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\ 
 Party Fixed Effects &  & \checkmark & \checkmark &  & \checkmark & \checkmark \\ 
@@ -274,7 +296,7 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:53
+% Date and time: Wed, Oct 14, 2020 - 09:53:51
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects} 
   \label{tab:Tenure} 
@@ -283,10 +305,10 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
  & \multicolumn{3}{c}{Dynamic CFscore Distance} & \multicolumn{3}{c}{Stable CFscore Distance} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- Public Financing Candidate & 0.104$^{***}$ & 0.096$^{***}$ & 0.101$^{***}$ & 0.133$^{***}$ & 0.065$^{***}$ & 0.074$^{***}$ \\ 
-  & (0.015) & (0.015) & (0.011) & (0.015) & (0.015) & (0.012) \\ 
+ Public Financing Candidate & 0.098$^{***}$ & 0.094$^{***}$ & 0.098$^{***}$ & 0.128$^{***}$ & 0.063$^{***}$ & 0.071$^{***}$ \\ 
+  & (0.018) & (0.017) & (0.015) & (0.017) & (0.017) & (0.016) \\ 
   Candidate Tenure & $-$0.019$^{***}$ & $-$0.019$^{***}$ & $-$0.019$^{***}$ & $-$0.016$^{***}$ & $-$0.019$^{***}$ & $-$0.021$^{***}$ \\ 
-  & (0.003) & (0.001) & (0.002) & (0.003) & (0.001) & (0.002) \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
  District Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\ 
 Party Fixed Effects &  & \checkmark & \checkmark &  & \checkmark & \checkmark \\ 
@@ -300,7 +322,7 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
 \end{table} 
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:38:55
+% Date and time: Wed, Oct 14, 2020 - 09:56:10
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District: DW-DIME and CFScore Two Way Fixed Effects} 
   \label{tab:DWDIME} 
@@ -309,8 +331,8 @@ N & 4,533 & 4,533 & 4,533 & 4,756 & 4,756 & 4,756 \\
  & DW-DIME Distance & Dynamic CFScore Distance \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
- Public Financing Candidate & 0.045$^{*}$ & 0.189$^{***}$ \\ 
-  & (0.018) & (0.031) \\ 
+ Public Financing Candidate & 0.049$^{**}$ & 0.197$^{***}$ \\ 
+  & (0.017) & (0.029) \\ 
  District Fixed Effects & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark \\ 
 N & 902 & 902 \\ 
@@ -320,11 +342,11 @@ N & 902 & 902 \\
 \multicolumn{3}{l}{method described in SI Section F} \\ 
 \end{tabular} 
 \end{table} 
-[1] "DWDIME Effect Size Interpretation: 0.300879634039005"
+[1] "DWDIME Effect Size Interpretation: 0.323527349841904"
 [1] "SD of Distance_CFDyn: 0.357327258345226"
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Mon, Oct 12, 2020 - 20:39:00
+% Date and time: Wed, Oct 14, 2020 - 10:04:41
 \begin{table}[H] \centering 
   \caption{Candidate Ideological Distance to District Pooled States 2004-2016 Two Way Fixed Effects} 
   \label{tab:CoreResults_alt} 
@@ -333,8 +355,8 @@ N & 902 & 902 \\
  & \multicolumn{3}{c}{Dynamic CFScore Distance} & \multicolumn{3}{c}{Stable CFScore Distance} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- Publicly Financed First Campaign & 0.055$^{*}$ & 0.052$^{***}$ & 0.062$^{***}$ & 0.103$^{***}$ & 0.051$^{***}$ & 0.056$^{**}$ \\ 
-  & (0.023) & (0.015) & (0.018) & (0.023) & (0.016) & (0.020) \\ 
+ Publicly Financed First Campaign & 0.060$^{**}$ & 0.057$^{**}$ & 0.067$^{***}$ & 0.109$^{***}$ & 0.057$^{**}$ & 0.061$^{**}$ \\ 
+  & (0.020) & (0.019) & (0.017) & (0.020) & (0.020) & (0.019) \\ 
  District Fixed Effects & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\ 
 Election Year Fixed Effects & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\ 
 Party Fixed Effects &  & \checkmark & \checkmark &  & \checkmark & \checkmark \\ 
