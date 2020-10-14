@@ -691,7 +691,7 @@ stargazer(Table2Column1,az_cf, ct_cf, me_cf,
 
 ## Save weights
 weightsPrint<-weights_CFDyn%>%pull()
-weightsLabel<-paste("AZ:", round(weightsPrint[1],2), "CT:", round(weightsPrint[2],2), "ME:",
+weightsLabel<-paste("Weights: AZ:", round(weightsPrint[1],2), "CT:", round(weightsPrint[2],2), "ME:",
                     round(weightsPrint[3],2))
 
 ## Pooled States: Dynamic Distance Estimate
