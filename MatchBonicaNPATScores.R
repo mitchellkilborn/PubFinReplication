@@ -75,7 +75,7 @@ loadRData <- function(fileName){
 fixed2014<-read.csv("MissingGeneralElectionAZCTMEFixed.csv", 
                     stringsAsFactors = FALSE)%>%
   distinct(bonica.rid, .keep_all=TRUE)%>% ## Drop duplicates by bonica.rid 
-  select(-c(name,district, seat,state, X, MissingCandidates_2014))%>%## Drop unneeded variables
+  dplyr::select(-c(name,district, seat,state, MissingCandidates_2014))%>%## Drop unneeded variables
   ## Insert 2014 ran.general fixes into ran.general column 
   mutate(ran.general_2014=ifelse(is.na(ran.general_2014),0, ran.general_2014),
          cycle=as.character(cycle))
@@ -89,7 +89,7 @@ dime<-loadRData("dime_recipients_all_1979_2018.rdata")
 ## Create object which will be matched to
 dimeClean<-dime%>%
   ## Select relevant variables
-  select(election,cycle, bonica.rid, name,lname, 
+  dplyr::select(election,cycle, bonica.rid, name,lname, 
                          state, seat, district,ran.general,winner )%>%
   ## Filter to 2000-2016 and AZ, ME, and CT state legislative observations
   filter(election>=2000 & election<=2016 & state%in%c("AZ", "ME", "CT") &
@@ -220,6 +220,7 @@ for(i in 1:nrow(dimeClean)){
 }
 
 ## Select columns to save and merge with can_fe.RDS dataset
-save<-dimeClean%>%select(NPAT_Score,cycle, bonica.rid, ShorMcCartyID)%>%
+save<-dimeClean%>%
+      dplyr::select(NPAT_Score,cycle, bonica.rid, ShorMcCartyID)%>%
       filter(is.na(NPAT_Score)==FALSE)
 #saveRDS(save, file="NP_ScoresMatchedToBonicaRIDS2000_2014_AZMECT.RDS")

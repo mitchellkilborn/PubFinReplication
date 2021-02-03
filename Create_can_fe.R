@@ -12,7 +12,7 @@
 
 rm(list=ls())
 # install required packages if they are missing:
-list.of.packages <- c("tidyverse", "stargazer","scales","sjPlot","lfe","stringdist","readstata13", "arm")
+list.of.packages <- c("tidyverse", "stargazer","scales","sjPlot","lfe","stringdist","readstata13", "arm", "stringi")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])];
 if(length(new.packages)){install.packages(new.packages)}
 lapply(list.of.packages, require, character.only = TRUE)
@@ -29,6 +29,7 @@ packinfo[which(packinfo$Package %in% list.of.packages),c("Package", "Version")]
 ## sjPlot                       2.8.5
 ## stargazer                    5.2.2
 ## stringdist                   0.9.6
+## stringi                      1.4.6
 ## tidyverse                    1.3.0
 ## readstata13                  0.9.2
 
@@ -263,7 +264,7 @@ for(s in 1:3){##Loop through state
 a<-pubfinlist[pubfinlist$Name %!in% start_dime$MatchName,]
 a<-a%>%arrange(State, Senate, District,Year)%>%
   filter(Year %!in% c(2011,2013, 2015))%>%
-  select(Name, Year,State,Senate,District)
+  dplyr::select(Name, Year,State,Senate,District)
 
 ## Bind the a dataset back to the start_dime dataset
 ## to easily check which candidates are in the pubfinlist dataset
@@ -271,7 +272,7 @@ a<-a%>%arrange(State, Senate, District,Year)%>%
 ## because the tolerance threshold used in the matching procedure
 ## was too low. 
 look<-start_dime%>%
-  select(bonica.rid,name,state, District,cycle,Senate)%>%
+  dplyr::select(bonica.rid,name,state, District,cycle,Senate)%>%
   mutate(cycle=as.numeric(cycle))
 a<-a%>%left_join(look, by=c("State"="state","District",
                             "Year"="cycle","Senate"="Senate"))
@@ -861,7 +862,7 @@ save_dime<-start_dime%>%
   ## Drop rows in bonica dataset which were NA, but added due to behavior of matching loop
   filter(is.na(election)==FALSE)%>%
   ## Select needed variables for analysis below
-  select(name,cycle, state,Senate,District,bonica.rid,
+  dplyr::select(name,cycle, state,Senate,District,bonica.rid,
          winner,gen.elec.stat,ran.general)
 
 #saveRDS(save_dime, "FTM_BONICA_MERGE_AddedThru2016_V5.RDS")
@@ -1076,7 +1077,7 @@ election_allres<-left_join(election_allres, MRP, by=c("year"="Election_Year",
 ## Load data with missing ran.general column for 2014
 fixed2014<-read.csv("MissingGeneralElectionAZCTMEFixed.csv", stringsAsFactors = FALSE)%>%
   distinct(bonica.rid, .keep_all=TRUE)%>%## drop duplicate observations by bonica.rid
-  dplyr::select(-c(name,district, seat,state, X, MissingCandidates_2014))%>%
+  dplyr::select(-c(name,district, seat,state, MissingCandidates_2014))%>%
   mutate(ran.general_2014=ifelse(is.na(ran.general_2014),0, ran.general_2014))## Convert empty cells to 0
 ## Load data with missing party for 2014-2016
 fixedMissingParty<-read.csv("Bonica_2014_2016MissingParty_Fixed.csv", stringsAsFactors = FALSE)%>%
@@ -1384,7 +1385,7 @@ can_fe<-can_fe%>%
                 CensusLines,CleanYear, RedistTime,WonElection,
                 CleanFirstRun,HasDistanceCFDyn, HasDistanceCFnonDyn,
                 PFStatusSwitcher,Incumbent, seat,
-                recipient.cfscore,NP_Score,dwdime,
+                recipient.cfscore,NPAT_Score,dwdime,
                 recipient.cfscore.dyn,ran.general,
                 HasDynamicCF,RepubIndicator,CompetitiveInteraction,CompetitiveElection,
                 tenure1, Distance_DWDIME, HasDistanceDWDIME)

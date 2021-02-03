@@ -67,7 +67,7 @@ sessionInfo()
 ## results of RunAnalyses.R to match the paper, the user will have to
 ## set TotalReps to 1000.
 
-TotalReps<-1000
+TotalReps<-10
 source("PrepEPFunctions.R")
 
 
@@ -548,7 +548,7 @@ ggplot(incumb_cf_MarginalEffect, aes(x=term,y=estimate))+theme_classic()+
   geom_errorbar(aes(ymin=conf.low,ymax=conf.high,
                     width=.5), size=1)+ylab("Marginal Effect on Ideological Distance")+
   geom_hline(yintercept=0, color="red", lty=2)+
-  scale_x_discrete(labels = wrap_format(10))+
+  scale_x_discrete(labels = label_wrap(10))+
   xlab("")+labs(caption="Marginal effects calculated using R SjPlot package.
 Horizontal lines are 95% confidence intervals")+coord_flip()+
   theme(axis.text =element_text(size=16, face="bold"),axis.title=element_text(size=16,face="bold"),
